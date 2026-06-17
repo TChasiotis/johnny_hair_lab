@@ -51,39 +51,37 @@ export default function Home() {
     { name: "Silver color 🧊(Men)", duration: "2 ώ.", price: "από 45 €" },
   ];
 
-  // Δεδομένα για τα προϊόντα
   const products = [
     {
       name: "Lavish Care Matte Paste",
       desc: "Δυνατό κράτημα & ματ υφή.",
       price: "14 €",
-      img: "matte_cream_paste.png",
+      img: "cs_product_1.png",
     },
     {
       name: "Lavish Care Sea Salt Spray",
       desc: "Όγκος και φυσικό styling.",
       price: "12 €",
-      img: "ocean_mist_salt_spray.png",
+      img: "cs_product_2.png",
     },
     {
       name: "Lavish Care Beard Oil",
       desc: "Ενυδάτωση & λάμψη για τα γένια.",
       price: "15 €",
-      img: "beard_oil.png",
+      img: "cs_product_3.png",
     },
     {
       name: "Lavish Care Hair Powder",
       desc: "Πούδρα για έξτρα όγκο.",
       price: "13 €",
-      img: "hair_powder.png",
+      img: "cs_product_4.png",
     },
   ];
 
-  // Δεδομένα για τις κριτικές
   const reviews = [
     {
       name: "Γιώργος Π.",
-      text: "Το καλύτερο σβήσιμο στην πόλη. Καθαρός χώρος και φοβερό παιδί",
+      text: "Το καλύτερο σβήσιμο στην πόλη. Καθαρός χώρος και φοβερά παιδιά.",
     },
     {
       name: "Νίκος Κ.",
@@ -91,11 +89,11 @@ export default function Home() {
     },
     {
       name: "Δημήτρης Α.",
-      text: "Άψογη εξυπηρέτηση και το μαγαζί τα σπάει από αισθητική",
+      text: "Άψογη εξυπηρέτηση και το μαγαζί τα σπάει από αισθητική. 5 αστέρια με κλειστά μάτια.",
     },
     {
       name: "Κώστας Μ.",
-      text: "Ο Τζόνι είναι καλλιτέχνης. Επιτέλους βρήκα τον μπαρμπέρη μου",
+      text: "Ο Γιάννης είναι καλλιτέχνης. Επιτέλους βρήκα τον μπαρμπέρη μου.",
     },
   ];
 
@@ -120,12 +118,12 @@ export default function Home() {
 
       <div className="fixed top-0 left-0 w-full h-screen z-0">
         <img
-          src="/hero_section_johnny_portrait.png"
+          src="./hero_section_johnny_portrait.png"
           alt="Hero Mobile"
           className="block sm:hidden w-full h-full object-cover object-center"
         />
         <img
-          src="/hero_section_johnny.png"
+          src="./hero_section_johnny.png"
           alt="Hero Desktop"
           className="hidden sm:block w-full h-full object-cover object-center"
         />
@@ -205,7 +203,7 @@ export default function Home() {
           </button>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-14 md:h-16">
             <img
-              src="/johnny_logo_no_bg.png"
+              src="./johnny_logo_no_bg.png"
               alt="Johnny Hair Lab Logo"
               className="h-full object-contain"
             />
@@ -342,7 +340,7 @@ export default function Home() {
                   style={{ perspective: 1000 }}
                 >
                   <img
-                    src={`/${img}`}
+                    src={`./${img}`}
                     alt={`Gallery ${index}`}
                     className="w-full h-full object-cover pointer-events-none"
                   />
@@ -426,9 +424,8 @@ export default function Home() {
                 className="flex-none w-[75vw] sm:w-[40vw] md:w-[280px] snap-center bg-white rounded-2xl p-6 shadow-sm border border-zinc-100 flex flex-col items-center text-center"
               >
                 <div className="w-full aspect-square bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center">
-                  {/* Εδώ μπαίνει η εικόνα του προϊόντος */}
                   <img
-                    src={`/${product.img}`}
+                    src={`./${product.img}`}
                     alt={product.name}
                     className="w-full h-full object-contain drop-shadow-md"
                   />
