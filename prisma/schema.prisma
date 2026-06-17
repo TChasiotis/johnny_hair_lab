@@ -1,11 +1,11 @@
-datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // Το Next.js και η Vercel ψάχνουν αυτό το όνομα στο .env
-  directUrl = env("POSTGRES_URL_NON_POOLING") // Απαραίτητο για τα migrations στη Vercel
-}
-
 generator client {
   provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // 1. Πίνακας για τον Διαχειριστή (Admin)
@@ -31,7 +31,7 @@ model Product {
   name      String
   desc      String
   price     String
-  img       String   // Το URL της εικόνας (είτε τοπικό είτε από το Vercel Blob/Cloudinary)
-  category  String   // π.χ. "waxes", "shampoos", "prep" για να τα φιλτράρουμε στο carousel
+  img       String   // Το URL της εικόνας
+  category  String   // π.χ. "waxes", "shampoos", "prep"
   createdAt DateTime @default(now())
 }
