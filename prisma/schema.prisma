@@ -1,0 +1,37 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL") // Το Next.js και η Vercel ψάχνουν αυτό το όνομα στο .env
+  directUrl = env("POSTGRES_URL_NON_POOLING") // Απαραίτητο για τα migrations στη Vercel
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// 1. Πίνακας για τον Διαχειριστή (Admin)
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Εδώ θα αποθηκευτεί το bcrypt hash
+  createdAt DateTime @default(now())
+}
+
+// 2. Πίνακας για τις Υπηρεσίες του κουρείου
+model Service {
+  id        String   @id @default(cuid())
+  name      String
+  duration  String   // π.χ. "30 λ." ή "1 ώ."
+  price     String   // π.χ. "12 €" ή "από 40 €"
+  createdAt DateTime @default(now())
+}
+
+// 3. Πίνακας για τα Προϊόντα (Lavish Care, κλπ)
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  desc      String
+  price     String
+  img       String   // Το URL της εικόνας (είτε τοπικό είτε από το Vercel Blob/Cloudinary)
+  category  String   // π.χ. "waxes", "shampoos", "prep" για να τα φιλτράρουμε στο carousel
+  createdAt DateTime @default(now())
+}
