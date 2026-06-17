@@ -498,13 +498,17 @@ export default function Home() {
                 key={index}
                 className="flex-none w-[75vw] sm:w-[40vw] md:w-[280px] snap-center bg-white rounded-2xl p-6 shadow-sm border border-zinc-100 flex flex-col items-center text-center"
               >
-                <div className="w-full aspect-square bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center">
+                {/* --- ΤΟ ΔΙΟΡΘΩΜΕΝΟ ΚΟΥΤΙ ΤΗΣ ΕΙΚΟΝΑΣ --- */}
+                {/* Βάλαμε h-56 (σταθερό ύψος) αντί για aspect-square */}
+                <div className="w-full h-56 bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center overflow-hidden">
                   <img
-                    src={`./${product.img}`}
+                    src={product.img}
                     alt={product.name}
                     className="w-full h-full object-contain drop-shadow-md"
                   />
                 </div>
+                {/* -------------------------------------- */}
+
                 <h3 className="font-semibold text-zinc-900 mb-2">
                   {product.name}
                 </h3>
