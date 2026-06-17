@@ -63,7 +63,7 @@ export default function Home() {
       name: "Lavish Care Hair Grooming Tonic",
       desc: "Ιδανικό για προετοιμασία styling με πιστολάκι.",
       price: "13 €",
-      img: "./products/lc_hair_grooming_tonic.png",
+      img: "./products/lc_care_hair_grooming_tonic.png",
     },
     {
       name: "Poppin' Yang Texture Powder",
@@ -77,7 +77,7 @@ export default function Home() {
       name: "Lavish Care Matte Cream Paste",
       desc: "Κρέμα για φυσικό αποτέλεσμα χωρίς γυαλάδα.",
       price: "13 €",
-      img: "./products/lc_matte_cream_paste.png",
+      img: "./products/matte_cream_paste.png",
     },
     {
       name: "Lavish Care Clay Pomade",
