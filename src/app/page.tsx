@@ -25,12 +25,12 @@ export default function Home() {
   });
 
   const galleryImages = [
-    "scshot1.png",
-    "scshot2.png",
-    "scshot3.png",
-    "scshot4.png",
-    "scshot5.png",
-    "scshot6.png",
+    "./scshots/scshot1.png",
+    "./scshots/scshot2.png",
+    "./scshots/scshot3.png",
+    "./scshots/scshot4.png",
+    "./scshots/scshot5.png",
+    "./scshots/scshot6.png",
   ];
 
   const services = [
@@ -52,29 +52,104 @@ export default function Home() {
   ];
 
   const products = [
+    // --- ΠΡΟΕΤΟΙΜΑΣΙΑ & ΟΓΚΟΣ (Prep & Volume) ---
     {
-      name: "Lavish Care Matte Paste",
-      desc: "Δυνατό κράτημα & ματ υφή.",
-      price: "13 €",
-      img: "matte_cream_paste.png",
-    },
-    {
-      name: "Lavish Care Sea Salt Spray",
-      desc: "Όγκος και φυσικό styling.",
-      price: "12 €",
-      img: "ocean_mist_salt_spray.png",
-    },
-    {
-      name: "Lavish Care Beard Oil",
-      desc: "Ενυδάτωση & λάμψη για τα γένια.",
+      name: "Poppin' Yang Sea Salt Spray",
+      desc: "Σπρέι αλατιού για όγκο και φυσικό styling.",
       price: "15 €",
-      img: "beard_oil.png",
+      img: "./products/poppin_yang_sea_salt_spray.png",
     },
     {
-      name: "Lavish Care Hair Powder",
-      desc: "Πούδρα για έξτρα όγκο.",
+      name: "Lavish Care Hair Grooming Tonic",
+      desc: "Ιδανικό για προετοιμασία styling με πιστολάκι.",
       price: "13 €",
-      img: "hair_powder.png",
+      img: "./products/lc_hair_grooming_tonic.png",
+    },
+    {
+      name: "Poppin' Yang Texture Powder",
+      desc: "Πούδρα για μέγιστο όγκο στις ρίζες.",
+      price: "15 €",
+      img: "./products/poppin_yang_texture_powder.png",
+    },
+
+    // --- ΠΟΜΑΔΕΣ & ΠΗΛΟΙ (Pomades, Clays, Pastes) ---
+    {
+      name: "Lavish Care Matte Cream Paste",
+      desc: "Κρέμα για φυσικό αποτέλεσμα χωρίς γυαλάδα.",
+      price: "13 €",
+      img: "./products/lc_matte_cream_paste.png",
+    },
+    {
+      name: "Lavish Care Clay Pomade",
+      desc: "Πομάδα αργίλου για δυνατό κράτημα και ματ υφή.",
+      price: "13 €",
+      img: "./products/lc_clay_pomade.png",
+    },
+    {
+      name: "Lavish Care Styling Mud",
+      desc: "Λάσπη φορμαρίσματος για ελαστικό κράτημα.",
+      price: "13 €",
+      img: "./products/lc_styling_mud.png",
+    },
+    {
+      name: "Lavish Care Strong Hold Deluxe",
+      desc: "Κλασική πομάδα για πολύ δυνατό κράτημα & λάμψη.",
+      price: "13 €",
+      img: "./products/lc_strong_hold_deluxe.png",
+    },
+
+    // --- ΚΕΡΙΑ (Waxes) ---
+    {
+      name: "Innovation Detreu Cream Wax 05",
+      desc: "Κρεμώδες κερί για φυσικό στυλ.",
+      price: "13 €",
+      img: "./products/innovation_detreu_cream_wax_05_natural_strong_soft.png",
+    },
+    {
+      name: "Innovation Detreu Aqua Wax 07",
+      desc: "Κερί νερού για εξαιρετικά δυνατό κράτημα.",
+      price: "13 €",
+      img: "./products/innovation_detreu_aqua_hair_wax_07_extra_strong_crazy.png",
+    },
+    {
+      name: "Innovation Detreu Aqua Wax 08",
+      desc: "Απόλυτος έλεγχος με εφέ δροσιάς.",
+      price: "13 €",
+      img: "./products/innovation_detreu_aqua_hair_wax_08_ultra_strong_cool.png",
+    },
+    {
+      name: "Red One Bright White Aqua Hair Wax",
+      desc: "Full force maximum control, καθαρό αποτέλεσμα.",
+      price: "12 €",
+      img: "./products/red_one_bright_white_aqua_hair_wax_full_force_maximum_control.png",
+    },
+
+    // --- ΚΑΘΑΡΙΣΜΟΣ & ΠΕΡΙΠΟΙΗΣΗ (Shampoos, Beard) ---
+    {
+      name: "Lavish Care Siberian Hunter",
+      desc: "Αναζωογονητικό σαμπουάν για μαλλιά και σώμα.",
+      price: "13 €",
+      img: "./products/lc_siberian_hunter.png",
+    },
+    {
+      name: "Lavish Care Siberian Healer",
+      desc: "Δροσιστικό σαμπουάν για βαθύ καθαρισμό.",
+      price: "13 €",
+      img: "./products/lc_siberian_healer.png",
+    },
+    {
+      name: "Poppin' Yang Beard Cream",
+      desc: "Κρέμα για μαλακά γένια και ενυδάτωση δέρματος.",
+      price: "15 €",
+      img: "./products/poppin_yang_beard_cream.png",
+    },
+
+    // --- AFTER SHAVE / ΚΟΛΟΝΙΕΣ ---
+    {
+      name: "Red One Natural Cologne Thunderbolt",
+      desc: "Κολόνια για έντονη φρεσκάδα μετά το κούρεμα.",
+      price: "13 €",
+      img: "./products/red_one_natural_cologne_pure_by_nature_thunderbolt.png",
     },
   ];
 
@@ -118,12 +193,12 @@ export default function Home() {
 
       <div className="fixed top-0 left-0 w-full h-screen z-0">
         <img
-          src="./hero_section_johnny_portrait.png"
+          src="./hero_section/hero_section_johnny_portrait.png"
           alt="Hero Mobile"
           className="block sm:hidden w-full h-full object-cover object-center"
         />
         <img
-          src="./hero_section_johnny.png"
+          src="./hero_section/hero_section_johnny.png"
           alt="Hero Desktop"
           className="hidden sm:block w-full h-full object-cover object-center"
         />
@@ -203,7 +278,7 @@ export default function Home() {
           </button>
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-14 md:h-16">
             <img
-              src="./johnny_logo_no_bg.png"
+              src="./logo/johnny_logo_no_bg.png"
               alt="Johnny Hair Lab Logo"
               className="h-full object-contain"
             />
