@@ -55,26 +55,26 @@ export default function Home() {
     {
       name: "Lavish Care Matte Paste",
       desc: "Δυνατό κράτημα & ματ υφή.",
-      price: "14 €",
-      img: "cs_product_1.png",
+      price: "13 €",
+      img: "matte_cream_paste.png",
     },
     {
       name: "Lavish Care Sea Salt Spray",
       desc: "Όγκος και φυσικό styling.",
       price: "12 €",
-      img: "cs_product_2.png",
+      img: "ocean_mist_salt_spray.png",
     },
     {
       name: "Lavish Care Beard Oil",
       desc: "Ενυδάτωση & λάμψη για τα γένια.",
       price: "15 €",
-      img: "cs_product_3.png",
+      img: "beard_oil.png",
     },
     {
       name: "Lavish Care Hair Powder",
       desc: "Πούδρα για έξτρα όγκο.",
       price: "13 €",
-      img: "cs_product_4.png",
+      img: "hair_powder.png",
     },
   ];
 
