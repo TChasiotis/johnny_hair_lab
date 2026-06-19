@@ -107,7 +107,7 @@ export async function createProduct(formData: FormData) {
     console.log("--> [1/4] Ξεκίνησε η δημιουργία προϊόντος:", name);
 
     let imgPath = "./products/default.png";
-    let apiUsed = false; // <--- ΝΕΟ: Ελέγχει αν όντως κάηκε credit
+    let apiUsed = false;
 
     if (file && file.size > 0) {
       console.log(
@@ -134,7 +134,7 @@ export async function createProduct(formData: FormData) {
           console.log("--> Το Remove.bg πέτυχε!");
           finalData = await apiResponse.arrayBuffer();
           fileNameToSave = `nobg_${file.name}.png`;
-          apiUsed = true; // <--- ΝΕΟ: Καταγράφουμε ότι το API έκανε δουλειά
+          apiUsed = true;
         } else {
           console.error("--> Σφάλμα από Remove.bg:", await apiResponse.text());
         }
@@ -170,9 +170,9 @@ export async function createProduct(formData: FormData) {
       },
     });
 
-    // <--- ΝΕΟ: Αποθηκεύει log χρήσης ΜΟΝΟ αν χρησιμοποιήθηκε το Remove.bg
+    // <--- Η ΔΙΟΡΘΩΣΗ: Προστέθηκε το { data: {} } για να μην "σκάει" το Prisma
     if (apiUsed) {
-      await prisma.apiLog.create({});
+      await prisma.apiLog.create({ data: {} });
     }
 
     console.log("--> [ΕΠΙΤΥΧΙΑ] Το προϊόν αποθηκεύτηκε! Γίνεται refresh...");

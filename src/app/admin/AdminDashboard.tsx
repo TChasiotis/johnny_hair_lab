@@ -156,7 +156,6 @@ export default function AdminDashboard({
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // --- ΕΛΕΓΧΟΣ ΜΕΓΕΘΟΥΣ (5MB) ---
     if (productFile && productFile.size > 5 * 1024 * 1024) {
       alert(
         "⚠️ Η φωτογραφία είναι πολύ μεγάλη (ξεπερνάει τα 5MB). Παρακαλώ επέλεξε μια μικρότερη.",
@@ -183,6 +182,9 @@ export default function AdminDashboard({
       }
       setProductModalOpen(false);
       router.refresh();
+    } catch (error) {
+      // Αν κάτι "σκάσει" στον server, θα σε ειδοποιήσει και δεν θα παγώσει.
+      alert("Προέκυψε σφάλμα κατά την αποθήκευση. Δοκίμασε ξανά.");
     } finally {
       setIsSubmitting(false);
     }
