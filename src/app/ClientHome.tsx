@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import {
   motion,
   AnimatePresence,
@@ -24,7 +23,7 @@ import {
 export default function ClientHome({
   services,
   products,
-  gallery = [], // <-- Νέο Prop
+  gallery = [], // Παίρνει τις φωτογραφίες από τη βάση
 }: {
   services: any[];
   products: any[];
@@ -117,9 +116,9 @@ export default function ClientHome({
 
   const currentT = t[lang];
 
-  // Αν υπάρχουν εικόνες στη βάση, παίρνει εκείνες. Αλλιώς, fallback στα screenshots
+  // Αν υπάρχουν εικόνες στη βάση, παίρνει εκείνες. Αλλιώς, δείχνει τα defaults με το ./
   const galleryImages =
-    gallery.length > 0
+    gallery && gallery.length > 0
       ? gallery.map((img: any) => img.url)
       : [
           "./scshots/scshot1.png",
@@ -226,23 +225,17 @@ export default function ClientHome({
       />
 
       <div className="fixed top-0 left-0 w-full h-screen z-0">
-        <Image
+        <img
           src="./hero_section/hero_section_johnny_portrait.png"
           alt="Hero Mobile"
-          fill
-          priority
-          sizes="100vw"
-          className="block sm:hidden object-cover object-center"
+          className="block sm:hidden w-full h-full object-cover object-center"
         />
-        <Image
+        <img
           src="./hero_section/hero_section_johnny.png"
           alt="Hero Desktop"
-          fill
-          priority
-          sizes="100vw"
-          className="hidden sm:block object-cover object-center"
+          className="hidden sm:block w-full h-full object-cover object-center"
         />
-        <div className="absolute inset-0 bg-white/20 z-10"></div>
+        <div className="absolute inset-0 bg-white/20"></div>
       </div>
 
       <AnimatePresence>
@@ -359,22 +352,19 @@ export default function ClientHome({
         <div className="max-w-7xl mx-auto px-6 h-20 md:h-24 flex items-center justify-between relative">
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="p-2 -ml-2 text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors z-20"
+            className="p-2 -ml-2 text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
           >
             <Menu size={28} />
           </button>
-
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-14 w-32 md:h-16 md:w-40 z-10">
-            <Image
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-14 md:h-16">
+            <img
               src="./logo/johnny_logo_no_bg.png"
               alt="Johnny Hair Lab Logo"
-              fill
-              priority
-              className="object-contain"
+              className="h-full object-contain"
             />
           </div>
 
-          <div className="flex items-center gap-3 z-20">
+          <div className="flex items-center gap-3 z-10">
             <button
               onClick={() => setLang(lang === "el" ? "en" : "el")}
               className="hidden sm:flex items-center gap-1.5 p-2 text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors text-sm font-semibold uppercase tracking-wider"
@@ -507,12 +497,10 @@ export default function ClientHome({
                   className="absolute w-[75vw] md:w-[400px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl"
                   style={{ perspective: 1000 }}
                 >
-                  <Image
+                  <img
                     src={img}
                     alt={`Gallery ${index}`}
-                    fill
-                    sizes="(max-width: 768px) 75vw, 400px"
-                    className="object-cover pointer-events-none"
+                    className="w-full h-full object-cover pointer-events-none"
                   />
                 </motion.div>
               );
@@ -613,12 +601,10 @@ export default function ClientHome({
                   key={index}
                   className="flex-none w-[75vw] sm:w-[40vw] md:w-[280px] snap-center bg-white rounded-2xl p-6 shadow-sm border border-zinc-100 flex flex-col items-center text-center"
                 >
-                  <div className="relative w-full h-56 bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center overflow-hidden">
-                    <Image
+                  <div className="w-full h-56 bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center overflow-hidden">
+                    <img
                       src={product.img}
                       alt={product.name}
-                      width={250}
-                      height={250}
                       className="w-full h-full object-contain drop-shadow-md"
                     />
                   </div>
