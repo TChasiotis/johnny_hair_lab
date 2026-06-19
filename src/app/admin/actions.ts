@@ -4,7 +4,7 @@ import prisma from "../lib/prisma";
 import { revalidatePath } from "next/cache";
 import fs from "fs";
 import path from "path";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 
 // --- ΥΠΗΡΕΣΙΕΣ (SERVICES) ---
 
@@ -200,11 +200,32 @@ export async function updateProduct(id: string, data: any) {
 }
 
 export async function deleteProduct(id: string) {
-  await prisma.product.delete({
-    where: { id },
-  });
-  revalidatePath("/admin");
-  revalidatePath("/");
+  try {
+    // 1. Βρίσκουμε το προϊόν για να πάρουμε το URL της εικόνας του
+    const product = await prisma.product.findUnique({
+      where: { id },
+    });
+
+    // 2. Αν υπάρχει εικόνα ΚΑΙ είναι ανεβασμένη στο Vercel Blob, τη διαγράφουμε
+    if (product?.img && product.img.includes("vercel-storage.com")) {
+      console.log("--> Διαγραφή αρχείου από Vercel Blob:", product.img);
+      await del(product.img, {
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+    }
+
+    // 3. Διαγράφουμε το προϊόν από τη βάση (Neon)
+    await prisma.product.delete({
+      where: { id },
+    });
+
+    console.log("--> Το προϊόν διαγράφηκε επιτυχώς!");
+    revalidatePath("/admin");
+    revalidatePath("/");
+  } catch (error) {
+    console.error("Σφάλμα κατά τη διαγραφή προϊόντος:", error);
+    throw new Error("Αποτυχία διαγραφής προϊόντος.");
+  }
 }
 
 export async function moveProduct(id: string, direction: "up" | "down") {
