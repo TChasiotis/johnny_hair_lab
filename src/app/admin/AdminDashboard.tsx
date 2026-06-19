@@ -14,6 +14,9 @@ import {
   ArrowUp,
   ArrowDown,
   Settings,
+  Eye,
+  EyeOff,
+  Loader2,
 } from "lucide-react";
 import {
   createService,
@@ -24,7 +27,7 @@ import {
   updateProduct,
   deleteProduct,
   moveProduct,
-  updateAdminSettings, // <-- Προστέθηκε εδώ!
+  updateAdminSettings,
 } from "./actions";
 
 export default function AdminDashboard({
@@ -48,11 +51,20 @@ export default function AdminDashboard({
   const defaultService = { name: "", nameEn: "", duration: "", price: "" };
   const [serviceForm, setServiceForm] = useState(defaultService);
 
-  // --- STATES ΓΙΑ ΤΙΣ ΡΥΘΜΙΣΕΙΣ ---
+  // --- STATES ΓΙΑ ΤΙΣ ΡΥΘΜΙΣΕΙΣ & LOGOUT ---
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsUsername, setSettingsUsername] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // States για το "ματάκι" στους κωδικούς
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsMessage, setSettingsMessage] = useState<{
     type: "success" | "error";
@@ -164,11 +176,25 @@ export default function AdminDashboard({
     }
   };
 
-  // --- SETTINGS HANDLER ---
+  // --- SETTINGS & LOGOUT HANDLERS ---
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await signOut({ callbackUrl: "/login" });
+  };
+
   const handleUpdateSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setSettingsLoading(true);
     setSettingsMessage(null);
+
+    if (newPassword && newPassword !== confirmPassword) {
+      setSettingsMessage({
+        type: "error",
+        text: "Οι νέοι κωδικοί δεν ταιριάζουν μεταξύ τους.",
+      });
+      setSettingsLoading(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("username", settingsUsername);
@@ -190,6 +216,7 @@ export default function AdminDashboard({
         });
         setOldPassword("");
         setNewPassword("");
+        setConfirmPassword("");
         setTimeout(() => setIsSettingsOpen(false), 2000);
       }
     } else {
@@ -242,10 +269,16 @@ export default function AdminDashboard({
             <span className="font-medium">Ρυθμίσεις</span>
           </button>
           <button
-            onClick={() => signOut({ callbackUrl: "/login" })}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-colors"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-colors disabled:opacity-50"
           >
-            <LogOut size={18} /> Αποσύνδεση
+            {isLoggingOut ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <LogOut size={18} />
+            )}
+            {isLoggingOut ? "Αποσύνδεση..." : "Αποσύνδεση"}
           </button>
         </div>
       </aside>
@@ -816,6 +849,31 @@ export default function AdminDashboard({
             </div>
 
             <form onSubmit={handleUpdateSettings} className="p-6 space-y-5">
+              {/* 1. ΠΑΛΙΟΣ ΚΩΔΙΚΟΣ (Επιβεβαίωση ταυτότητας) */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
+                  Παλαιός Κωδικός *
+                </label>
+                <div className="relative">
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    className="w-full px-4 py-2.5 pr-10 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                  >
+                    {showOldPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* 2. ΝΕΟ USERNAME */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
                   Νέο Όνομα Χρήστη
@@ -830,42 +888,73 @@ export default function AdminDashboard({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
-                  Παλαιός Κωδικός
-                </label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
-                  required
-                />
-              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {/* 3. ΝΕΟΣ ΚΩΔΙΚΟΣ */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
+                    Νέος Κωδικός{" "}
+                    <span className="text-zinc-400 normal-case font-normal">
+                      (Προαιρετικό)
+                    </span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      placeholder="Νέος κωδικός"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 pr-10 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                    >
+                      {showNewPassword ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
-                  Νέος Κωδικός{" "}
-                  <span className="text-zinc-400 normal-case font-normal">
-                    (Προαιρετικό)
-                  </span>
-                </label>
-                <input
-                  type="password"
-                  placeholder="Αφήστε κενό αν δεν αλλάξει"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
-                />
+                {/* 4. ΕΠΙΒΕΒΑΙΩΣΗ ΝΕΟΥ ΚΩΔΙΚΟΥ */}
+                <div>
+                  <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5 whitespace-nowrap">
+                    Επιβεβαίωση Κωδικού
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Επανάληψη"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-4 py-2.5 pr-10 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff size={16} />
+                      ) : (
+                        <Eye size={16} />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {settingsMessage && (
                 <div
                   className={`p-3 rounded-lg text-sm font-medium ${
                     settingsMessage.type === "success"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-red-50 text-red-700"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "bg-red-50 text-red-700 border border-red-200"
                   }`}
                 >
                   {settingsMessage.text}
@@ -876,9 +965,14 @@ export default function AdminDashboard({
                 <button
                   type="submit"
                   disabled={settingsLoading}
-                  className="w-full bg-zinc-950 hover:bg-zinc-800 text-white font-medium text-sm px-5 py-3 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center"
+                  className="w-full bg-zinc-950 hover:bg-zinc-800 text-white font-medium text-sm px-5 py-3 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center gap-2"
                 >
-                  {settingsLoading ? "Ενημέρωση..." : "Αποθήκευση Αλλαγών"}
+                  {settingsLoading && (
+                    <Loader2 size={16} className="animate-spin" />
+                  )}
+                  {settingsLoading
+                    ? "Γίνεται ενημέρωση..."
+                    : "Αποθήκευση Αλλαγών"}
                 </button>
               </div>
             </form>
