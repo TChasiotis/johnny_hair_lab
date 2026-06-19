@@ -107,13 +107,13 @@ export async function createProduct(formData: FormData) {
     console.log("--> [1/4] Ξεκίνησε η δημιουργία προϊόντος:", name);
 
     let imgPath = "./products/default.png";
+    let apiUsed = false; // <--- ΝΕΟ: Ελέγχει αν όντως κάηκε credit
 
     if (file && file.size > 0) {
       console.log(
         `--> Βρέθηκε αρχείο: ${file.name} | Μέγεθος: ${file.size} bytes`,
       );
 
-      // Αντί για Buffer, κρατάμε το αρχείο στην αρχική του μορφή ή ως ArrayBuffer
       let finalData: File | ArrayBuffer = file;
       let fileNameToSave = file.name;
       const apiKey = process.env.REMOVE_BG_API_KEY;
@@ -132,8 +132,9 @@ export async function createProduct(formData: FormData) {
 
         if (apiResponse.ok) {
           console.log("--> Το Remove.bg πέτυχε!");
-          finalData = await apiResponse.arrayBuffer(); // Παίρνουμε το καθαρό αρχείο
+          finalData = await apiResponse.arrayBuffer();
           fileNameToSave = `nobg_${file.name}.png`;
+          apiUsed = true; // <--- ΝΕΟ: Καταγράφουμε ότι το API έκανε δουλειά
         } else {
           console.error("--> Σφάλμα από Remove.bg:", await apiResponse.text());
         }
@@ -142,17 +143,16 @@ export async function createProduct(formData: FormData) {
       console.log("--> [3/4] Ανέβασμα στο Vercel Blob...");
       const uniqueFilename = `${Date.now()}-${fileNameToSave.replace(/\s+/g, "_")}`;
 
-      // Ανεβάζουμε απευθείας το finalData (χωρίς να μπλέκουμε Node.js Buffers)
       const blobResponse = await put(uniqueFilename, finalData, {
         access: "public",
-        token: process.env.BLOB_READ_WRITE_TOKEN, // Το δηλώνουμε ρητά για σιγουριά
+        token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
-      console.log("--> Το Blob ανέβηκε επιτυχώς στο URL:", blobResponse.url);
+      console.log("--> Το Blob ανέβηκε επιτυχώς:", blobResponse.url);
       imgPath = blobResponse.url;
     }
 
-    console.log("--> [4/4] Αποθήκευση στη βάση δεδομένων (Neon)...");
+    console.log("--> [4/4] Αποθήκευση στη βάση δεδομένων...");
     const maxProduct = await prisma.product.findFirst({
       orderBy: { sortOrder: "desc" },
     });
@@ -170,15 +170,20 @@ export async function createProduct(formData: FormData) {
       },
     });
 
+    // <--- ΝΕΟ: Αποθηκεύει log χρήσης ΜΟΝΟ αν χρησιμοποιήθηκε το Remove.bg
+    if (apiUsed) {
+      await prisma.apiLog.create({});
+    }
+
     console.log("--> [ΕΠΙΤΥΧΙΑ] Το προϊόν αποθηκεύτηκε! Γίνεται refresh...");
     revalidatePath("/admin");
     revalidatePath("/");
   } catch (error: any) {
-    // ΑΝ ΚΑΤΙ ΣΚΑΣΕΙ, ΘΑ ΤΥΠΩΘΕΙ ΑΥΤΟ ΣΤΑ LOGS ΤΟΥ VERCEL!
     console.error("!!! ΚΡΙΣΙΜΟ ΣΦΑΛΜΑ ΣΤΟ CREATE PRODUCT !!!", error);
     throw new Error("Αποτυχία δημιουργίας προϊόντος. Δες τα Vercel Logs.");
   }
 }
+
 export async function updateProduct(id: string, data: any) {
   await prisma.product.update({
     where: { id },
