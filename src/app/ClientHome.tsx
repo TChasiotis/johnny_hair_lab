@@ -46,6 +46,9 @@ export default function ClientHome({
         gallery: "Our Work",
         services: "Υπηρεσίες",
         products: "Προϊόντα",
+        reviews: "Κριτικές",
+        contact: "Επικοινωνία",
+        map: "Τοποθεσία",
         book: "Κράτηση",
       },
       hero: { address: "Γ. Μπακατσέλου 3" },
@@ -78,6 +81,9 @@ export default function ClientHome({
         gallery: "Our Work",
         services: "Services",
         products: "Products",
+        reviews: "Reviews",
+        contact: "Contact",
+        map: "Location",
         book: "Book Now",
       },
       hero: { address: "3 G. Mpakatselou St." },
@@ -290,6 +296,27 @@ export default function ClientHome({
                   className="hover:text-zinc-950 transition-colors"
                 >
                   {currentT.nav.products}
+                </a>
+                <a
+                  href="#reviews"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="hover:text-zinc-950 transition-colors"
+                >
+                  {currentT.nav.reviews}
+                </a>
+                <a
+                  href="#contact"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="hover:text-zinc-950 transition-colors"
+                >
+                  {currentT.nav.contact}
+                </a>
+                <a
+                  href="#map"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="hover:text-zinc-950 transition-colors"
+                >
+                  {currentT.nav.map}
                 </a>
               </nav>
 
@@ -595,7 +622,10 @@ export default function ClientHome({
       </section>
 
       {/* GOOGLE REVIEWS */}
-      <section className="py-24 bg-zinc-900 text-zinc-50 relative z-20">
+      <section
+        id="reviews"
+        className="py-24 bg-zinc-900 text-zinc-50 relative z-20"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-16 text-center">
             <div className="flex justify-center gap-1 mb-4">
@@ -640,7 +670,7 @@ export default function ClientHome({
       </section>
 
       {/* MAP & FOOTER */}
-      <section className="bg-zinc-950 text-white relative z-20">
+      <section id="contact" className="bg-zinc-950 text-white relative z-20">
         <div className="grid md:grid-cols-2 min-h-[500px]">
           <div className="p-12 flex flex-col justify-center bg-zinc-950 border-t border-zinc-900">
             <h3 className="text-2xl font-bold mb-8">
@@ -706,7 +736,10 @@ export default function ClientHome({
               </div>
             </div>
           </div>
-          <div className="w-full h-[400px] md:h-full md:grayscale md:hover:grayscale-0 grayscale-0 transition-all duration-500">
+          <div
+            id="map"
+            className="w-full h-[400px] md:h-full md:grayscale md:hover:grayscale-0 grayscale-0 transition-all duration-500"
+          >
             <iframe
               src="https://maps.google.com/maps?q=Johnny+Hair+Lab,+Thessaloniki&t=&z=16&ie=UTF8&iwloc=&output=embed"
               width="100%"

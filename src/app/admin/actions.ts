@@ -4,6 +4,7 @@ import prisma from "../lib/prisma";
 import { revalidatePath } from "next/cache";
 import fs from "fs";
 import path from "path";
+import { put } from "@vercel/blob";
 
 // --- ΥΠΗΡΕΣΙΕΣ (SERVICES) ---
 
@@ -100,7 +101,7 @@ export async function createProduct(formData: FormData) {
   const descEn = formData.get("descEn") as string;
   const category = formData.get("category") as string;
   const file = formData.get("file") as File;
-  const useRemoveBg = formData.get("useRemoveBg") === "true"; // Πιάνουμε το toggle
+  const useRemoveBg = formData.get("useRemoveBg") === "true";
 
   let imgPath = "./products/default.png";
 
@@ -108,8 +109,9 @@ export async function createProduct(formData: FormData) {
     const buffer = Buffer.from(await file.arrayBuffer());
     let finalBuffer = buffer;
     const apiKey = process.env.REMOVE_BG_API_KEY;
+    let fileNameToSave = file.name;
 
-    // Τρέχει το API ΜΟΝΟ αν το toggle είναι ανοιχτό ΚΑΙ υπάρχει API Key
+    // 1. Τρέχει το AI αν το toggle είναι ανοιχτό
     if (useRemoveBg && apiKey) {
       try {
         const apiFormData = new FormData();
@@ -126,27 +128,25 @@ export async function createProduct(formData: FormData) {
         if (apiResponse.ok) {
           const arrayBuffer = await apiResponse.arrayBuffer();
           finalBuffer = Buffer.from(arrayBuffer);
+          fileNameToSave = `nobg_${file.name}.png`; // Αλλάζουμε κατάληξη αν βγήκε το φόντο
         } else {
-          console.error(
-            "Σφάλμα από το Remove.bg API:",
-            await apiResponse.text(),
-          );
+          console.error("Σφάλμα API:", await apiResponse.text());
         }
       } catch (err) {
-        console.error("Αποτυχία σύνδεσης με το Remove.bg API:", err);
+        console.error("Αποτυχία σύνδεσης API:", err);
       }
     }
 
-    const filename = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
-    const publicProductsDir = path.join(process.cwd(), "public", "products");
+    // 2. ΑΝΕΒΑΣΜΑ ΣΤΟ VERCEL BLOB
+    const uniqueFilename = `${Date.now()}-${fileNameToSave.replace(/\s+/g, "_")}`;
 
-    if (!fs.existsSync(publicProductsDir)) {
-      fs.mkdirSync(publicProductsDir, { recursive: true });
-    }
+    // Η εντολή put() ανεβάζει το αρχείο και επιστρέφει το URL του
+    const blobResponse = await put(uniqueFilename, finalBuffer, {
+      access: "public", // Κάνουμε την εικόνα δημόσια για να φαίνεται στο site
+    });
 
-    const fullPath = path.join(publicProductsDir, filename);
-    fs.writeFileSync(fullPath, finalBuffer);
-    imgPath = `./products/${filename}`;
+    // Παίρνουμε το καθαρό URL που μας δίνει η Vercel
+    imgPath = blobResponse.url;
   }
 
   const maxProduct = await prisma.product.findFirst({
@@ -169,7 +169,6 @@ export async function createProduct(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/");
 }
-
 export async function updateProduct(id: string, data: any) {
   await prisma.product.update({
     where: { id },
