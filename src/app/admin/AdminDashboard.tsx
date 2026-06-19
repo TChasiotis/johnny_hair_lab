@@ -35,6 +35,9 @@ export default function AdminDashboard({
     "services",
   );
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [useRemoveBg, setUseRemoveBg] = useState(true);
+
   const [isServiceModalOpen, setServiceModalOpen] = useState(false);
   const [isProductModalOpen, setProductModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -124,23 +127,28 @@ export default function AdminDashboard({
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId) {
-      await updateProduct(editingId, productForm);
-    } else {
-      // Χτίζουμε FormData για το File Upload
-      const formData = new FormData();
-      formData.append("name", productForm.name);
-      formData.append("price", productForm.price);
-      formData.append("category", productForm.category);
-      formData.append("desc", productForm.desc);
-      formData.append("descEn", productForm.descEn);
-      if (productFile) {
-        formData.append("file", productFile);
+    setIsSubmitting(true); // Ξεκινάει το loading
+    try {
+      if (editingId) {
+        await updateProduct(editingId, productForm);
+      } else {
+        const formData = new FormData();
+        formData.append("name", productForm.name);
+        formData.append("price", productForm.price);
+        formData.append("category", productForm.category);
+        formData.append("desc", productForm.desc);
+        formData.append("descEn", productForm.descEn);
+        formData.append("useRemoveBg", useRemoveBg ? "true" : "false"); // Στέλνουμε το toggle
+        if (productFile) {
+          formData.append("file", productFile);
+        }
+        await createProduct(formData);
       }
-      await createProduct(formData);
+      setProductModalOpen(false);
+      router.refresh();
+    } finally {
+      setIsSubmitting(false); // Σταματάει το loading
     }
-    setProductModalOpen(false);
-    router.refresh();
   };
 
   return (
@@ -622,16 +630,40 @@ export default function AdminDashboard({
                       }
                       className="w-full px-4 py-1.5 border border-zinc-200 rounded-lg outline-none file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-zinc-950 file:text-white hover:file:bg-zinc-800 cursor-pointer"
                     />
-                    {monthlyUploadsCount >= 50 ? (
-                      <p className="text-[11px] text-amber-600 font-medium mt-1 bg-amber-50 border border-amber-200 rounded p-1.5">
-                        ⚠️ Έχεις συμπληρώσει τις 50 δωρεάν αφαιρέσεις για αυτόν
-                        τον μήνα. Το προϊόν θα αποθηκευτεί κανονικά, αλλά η
-                        φωτογραφία θα εμφανίζεται με το αρχικό της φόντο.
+
+                    {/* ΤΟ ΔΙΑΚΟΠΤΑΚΙ (TOGGLE) */}
+                    <div className="mt-3 mb-1 flex items-center gap-2 bg-zinc-50 p-2 rounded border border-zinc-200">
+                      <input
+                        type="checkbox"
+                        id="removeBgToggle"
+                        checked={useRemoveBg}
+                        onChange={(e) => setUseRemoveBg(e.target.checked)}
+                        className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900 cursor-pointer"
+                      />
+                      <label
+                        htmlFor="removeBgToggle"
+                        className="text-sm font-medium text-zinc-700 cursor-pointer select-none"
+                      >
+                        Αυτόματη αφαίρεση φόντου (AI)
+                      </label>
+                    </div>
+
+                    {/* ΤΑ ΕΞΥΠΝΑ ΜΗΝΥΜΑΤΑ */}
+                    {useRemoveBg && monthlyUploadsCount >= 50 ? (
+                      <p className="text-[11px] text-amber-600 font-medium bg-amber-50 border border-amber-200 rounded p-1.5">
+                        ⚠️ Έχεις συμπληρώσει τις 50 δωρεάν αφαιρέσεις. Το προϊόν
+                        θα αποθηκευτεί κανονικά, αλλά η φωτογραφία θα
+                        εμφανίζεται με το αρχικό της φόντο.
                       </p>
-                    ) : (
-                      <p className="text-[11px] text-zinc-400 mt-1">
+                    ) : useRemoveBg ? (
+                      <p className="text-[11px] text-zinc-400">
                         ✨ Το φόντο της φωτογραφίας θα αφαιρεθεί αυτόματα και
                         δωρεάν.
+                      </p>
+                    ) : (
+                      <p className="text-[11px] text-zinc-400">
+                        ℹ️ Η φωτογραφία θα ανέβει ακριβώς όπως είναι (με το
+                        φόντο της).
                       </p>
                     )}
                   </div>
@@ -679,9 +711,10 @@ export default function AdminDashboard({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 text-white bg-zinc-950 hover:bg-zinc-800 rounded-lg font-medium transition-colors"
+                  disabled={isSubmitting}
+                  className="px-5 py-2.5 text-white bg-zinc-950 hover:bg-zinc-800 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  Αποθήκευση
+                  {isSubmitting ? "Γίνεται αποθήκευση..." : "Αποθήκευση"}
                 </button>
               </div>
             </form>

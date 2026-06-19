@@ -11,15 +11,25 @@ export default async function AdminPage() {
     redirect("/login");
   }
 
-  // Βρίσκουμε την 1η μέρα του τρέχοντος μήνα (π.χ. 2026-06-01)
+  // Μηδενισμός στις 19 κάθε μήνα
   const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const resetDay = 19;
+  let startOfBillingCycle;
 
-  // Μετράμε πόσα προϊόντα δημιουργήθηκαν αυτόν τον μήνα
+  if (now.getDate() >= resetDay) {
+    startOfBillingCycle = new Date(now.getFullYear(), now.getMonth(), resetDay);
+  } else {
+    startOfBillingCycle = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      resetDay,
+    );
+  }
+
   const monthlyUploadsCount = await prisma.product.count({
     where: {
       createdAt: {
-        gte: startOfMonth,
+        gte: startOfBillingCycle,
       },
     },
   });
@@ -35,7 +45,7 @@ export default async function AdminPage() {
     <AdminDashboard
       initialServices={services}
       initialProducts={products}
-      monthlyUploadsCount={monthlyUploadsCount} // Στέλνουμε τον μετρητή στο UI
+      monthlyUploadsCount={monthlyUploadsCount}
     />
   );
 }

@@ -100,19 +100,18 @@ export async function createProduct(formData: FormData) {
   const descEn = formData.get("descEn") as string;
   const category = formData.get("category") as string;
   const file = formData.get("file") as File;
+  const useRemoveBg = formData.get("useRemoveBg") === "true"; // Πιάνουμε το toggle
 
-  let imgPath = "./products/default.png"; // Fallback αν δεν ανεβεί τίποτα
+  let imgPath = "./products/default.png";
 
   if (file && file.size > 0) {
-    // Μετατροπή του αρχείου σε Node.js Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
     let finalBuffer = buffer;
-
     const apiKey = process.env.REMOVE_BG_API_KEY;
 
-    if (apiKey) {
+    // Τρέχει το API ΜΟΝΟ αν το toggle είναι ανοιχτό ΚΑΙ υπάρχει API Key
+    if (useRemoveBg && apiKey) {
       try {
-        // Χτίζουμε το αίτημα για το Remove.bg API
         const apiFormData = new FormData();
         const blob = new Blob([buffer], { type: file.type });
         apiFormData.append("image_file", blob, file.name);
@@ -127,7 +126,6 @@ export async function createProduct(formData: FormData) {
         if (apiResponse.ok) {
           const arrayBuffer = await apiResponse.arrayBuffer();
           finalBuffer = Buffer.from(arrayBuffer);
-          console.log("Το φόντο αφαιρέθηκε επιτυχώς μέσω του Remove.bg API!");
         } else {
           console.error(
             "Σφάλμα από το Remove.bg API:",
@@ -139,20 +137,15 @@ export async function createProduct(formData: FormData) {
       }
     }
 
-    // Ορίζουμε τη διαδρομή αποθήκευσης στα Windows (public/products/)
     const filename = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
     const publicProductsDir = path.join(process.cwd(), "public", "products");
 
-    // Σιγουρευόμαστε ότι ο φάκελος υπάρχει
     if (!fs.existsSync(publicProductsDir)) {
       fs.mkdirSync(publicProductsDir, { recursive: true });
     }
 
-    // Εγγραφή του τελικού αρχείου στον δίσκο
     const fullPath = path.join(publicProductsDir, filename);
     fs.writeFileSync(fullPath, finalBuffer);
-
-    // Η σχετική διαδρομή που αποθηκεύεται στη βάση δεδομένων
     imgPath = `./products/${filename}`;
   }
 
