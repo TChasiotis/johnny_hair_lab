@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useSpring,
+  PanInfo,
+} from "framer-motion";
 import {
   MapPin,
   Clock,
@@ -37,8 +43,8 @@ export default function ClientHome({
     el: {
       nav: {
         about: "Σχετικά",
+        gallery: "Our Work",
         services: "Υπηρεσίες",
-        gallery: "Έργα",
         products: "Προϊόντα",
         book: "Κράτηση",
       },
@@ -47,7 +53,7 @@ export default function ClientHome({
         title: "Η Φιλοσοφια Μας",
         text: "Στην καρδιά της Θεσσαλονίκης, το Johnny Hair Lab προσφέρει μια μοναδική εμπειρία κουρέματος, με έμφαση στην ποιότητα και την περιβαλλοντική συνείδηση. Δημιουργούμε στυλ που αποπνέουν αυτοπεποίθηση, φροντίζοντας κάθε πελάτη με φιλική προσέγγιση.",
       },
-      gallery: { title: "Το Αποτέλεσμα" },
+      gallery: { title: "Our Work" },
       services: { title: "Υπηρεσίες" },
       products: {
         title: "Προϊόντα Περιποίησης",
@@ -69,8 +75,8 @@ export default function ClientHome({
     en: {
       nav: {
         about: "About",
+        gallery: "Our Work",
         services: "Services",
-        gallery: "Gallery",
         products: "Products",
         book: "Book Now",
       },
@@ -111,13 +117,12 @@ export default function ClientHome({
     "./scshots/scshot6.png",
   ];
 
-  // Δεδομένα των πραγματικών κριτικών με ενσωματωμένες τις μεταφράσεις
   const reviews = [
     {
       name: "Κωνσταντίνος",
       text: {
         el: "Άνετα το καλύτερο κουρείο στην Θεσσαλονίκη πολύ φιλικό περιβάλλον και ο τζονι ο καλύτερος κουρέας ότι κούρεμα κι αν ζητήσετε θα έχετε το καλύτερο αποτέλεσμα.",
-        en: "Άνετα το καλύτερο κουρείο στην Θεσσαλονίκη πολύ φιλικό περιβάλλον και ο τζονι ο καλύτερος κουρέας... (Easily the best barbershop in Thessaloniki, very friendly environment and Johnny is the best barber. Whatever haircut you ask for, you will get the best result.)",
+        en: "Άνετα το καλύτερο κουρείο στην Θεσσαλονίκη πολύ φιλικό περιβάλλον και ο τζονι ο καλύτερος κουρέας ότι κούρεμα κι αν ζητήσετε θα έχετε το καλύτερο αποτέλεσμα.(Easily the best barbershop in Thessaloniki, very friendly environment and Johnny is the best barber. Whatever haircut you ask for, you will get the best result.)",
       },
     },
     {
@@ -131,7 +136,7 @@ export default function ClientHome({
       name: "Απόστολος ΠΑΠΑΤΣΙΜΠΑΣ",
       text: {
         el: "Ακραία και σταθερά και κουρέματα, πολύ ευγενικός και ο ίδιος ο κουρέας αξίζει χωρίς αμφιβολία!!🔥🔥",
-        en: "Ακραία και σταθερά και κουρέματα, πολύ ευγενικός και ο ίδιος ο κουρέας... (Extreme and consistent haircuts, the barber himself is very polite, totally worth it without a doubt!!🔥🔥)",
+        en: "Ακραία και σταθερά και κουρέματα, πολύ ευγενικός και ο ίδιος ο κουρέας αξίζει χωρίς αμφιβολία!!🔥🔥 (Extreme and consistent haircuts, the barber himself is very polite, totally worth it without a doubt!!🔥🔥)",
       },
     },
     {
@@ -145,7 +150,7 @@ export default function ClientHome({
       name: "Γιάννης Χελάς",
       text: {
         el: "Είναι ένα από τα καλύτερα κουρεία στην πόλη! Ο χώρος είναι καθαρός, ο Τζόνι πάντα εξυπηρετικός, χαμογελαστός, ευδιάθετος και φιλικός με όλους. Κάνει το κούρεμα μία ευχάριστη εμπειρία, μέσα από την κουβέντα, την περιποίηση και πάντοτε κοιτάζει να αφήσει τον κάθε πελάτη ικανοποιημένο...",
-        en: "Είναι ένα από τα καλύτερα κουρεία στην πόλη... (One of the best barbershops in town! The place is clean, Johnny is always helpful, smiling, cheerful, and friendly. He makes the haircut a pleasant experience through conversation and always leaves every customer satisfied...)",
+        en: "Είναι ένα από τα καλύτερα κουρεία στην πόλη! Ο χώρος είναι καθαρός, ο Τζόνι πάντα εξυπηρετικός, χαμογελαστός, ευδιάθετος και φιλικός με όλους. Κάνει το κούρεμα μία ευχάριστη εμπειρία, μέσα από την κουβέντα, την περιποίηση και πάντοτε κοιτάζει να αφήσει τον κάθε πελάτη ικανοποιημένο... (One of the best barbershops in town! The place is clean, Johnny is always helpful, smiling, cheerful, and friendly. He makes the haircut a pleasant experience through conversation and always leaves every customer satisfied...)",
       },
     },
     {
@@ -159,28 +164,28 @@ export default function ClientHome({
       name: "κωστας ζαραγκουλιας",
       text: {
         el: "Παρά πολύ καλός στη δουλειά του εξυπηρετικός, με το χαμόγελο πάντα και πρόθυμος να ακούσει την άποψη σου αν δεν σου αρέσει κάτι!!!",
-        en: "Παρά πολύ καλός στη δουλειά του... (Very good at his job, helpful, always with a smile and willing to listen to your opinion if you don't like something!!!)",
+        en: "Παρά πολύ καλός στη δουλειά του εξυπηρετικός, με το χαμόγελο πάντα και πρόθυμος να ακούσει την άποψη σου αν δεν σου αρέσει κάτι!!! (Very good at his job, helpful, always with a smile and willing to listen to your opinion if you don't like something!!!)",
       },
     },
     {
       name: "Αλέξανδρος Χαραλαμπιδης",
       text: {
         el: "Παρά πολύ όμορφα διαμορφωμένος χώρος με πολύ καλή εξυπηρέτηση. Πολύ καλή επικοινωνία, γρήγορο κούρεμα και φεύγεις γνωρίζοντας πως είσαι κουρεμένος ακριβώς όπως το ζήτησες!!!",
-        en: "Παρά πολύ όμορφα διαμορφωμένος χώρος... (Beautifully designed space with very good service. Great communication, quick haircut, and you leave knowing you got exactly the haircut you asked for!!!)",
+        en: "Παρά πολύ όμορφα διαμορφωμένος χώρος με πολύ καλή εξυπηρέτηση. Πολύ καλή επικοινωνία, γρήγορο κούρεμα και φεύγεις γνωρίζοντας πως είσαι κουρεμένος ακριβώς όπως το ζήτησες!!! (Beautifully designed space with very good service. Great communication, quick haircut, and you leave knowing you got exactly the haircut you asked for!!!)",
       },
     },
     {
       name: "Kon Kan",
       text: {
         el: "Εξαιρετικό ταλέντο στη κομμωτική τέχνη. Γρηγορη εξυπηρέτηση και αξιοπιστία. Τον συνιστώ ανεπιφύλακτα σε όλους!!!!",
-        en: "Εξαιρετικό ταλέντο στη κομμωτική τέχνη... (Exceptional talent in hairdressing. Fast service and reliability. I highly recommend him to everyone!!!!)",
+        en: "Εξαιρετικό ταλέντο στη κομμωτική τέχνη. Γρηγορη εξυπηρέτηση και αξιοπιστία. Τον συνιστώ ανεπιφύλακτα σε όλους!!!! (Exceptional talent in hairdressing. Fast service and reliability. I highly recommend him to everyone!!!!)",
       },
     },
     {
       name: "eraldi dervishaj",
       text: {
         el: "Από τα καλύτερα κουρέματα που μου έχουν κάνει με λεπτομέρεια και άριστο αποτέλεσμα συνιστώ σε όλους.",
-        en: "Από τα καλύτερα κουρέματα που μου έχουν κάνει... (One of the best haircuts I've ever had, detailed with excellent results, I recommend it to everyone.)",
+        en: "Από τα καλύτερα κουρέματα που μου έχουν κάνει με λεπτομέρεια και άριστο αποτέλεσμα συνιστώ σε όλους. (One of the best haircuts I've ever had, detailed with excellent results, I recommend it to everyone.)",
       },
     },
   ];
@@ -191,7 +196,11 @@ export default function ClientHome({
     setGalleryIndex(
       (prev) => (prev - 1 + galleryImages.length) % galleryImages.length,
     );
-  const handleDragEnd = (event: any, info: any) => {
+
+  const handleDragEnd = (
+    event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo,
+  ) => {
     if (info.offset.x < -50) nextImage();
     else if (info.offset.x > 50) prevImage();
   };
@@ -234,26 +243,32 @@ export default function ClientHome({
               transition={{ type: "tween", duration: 0.3 }}
               className="fixed top-0 left-0 h-full w-64 bg-white z-[80] shadow-2xl flex flex-col px-6 py-8"
             >
-              <button
-                onClick={() => setIsMenuOpen(false)}
-                className="self-end mb-8 text-zinc-500 hover:text-zinc-900"
-              >
-                <X size={28} />
-              </button>
-              <div className="flex flex-col gap-6 text-lg font-medium text-zinc-700">
+              {/* TOP: Header με Λογότυπο και κουμπί Κλεισίματος */}
+              <div className="flex justify-between items-center mb-8 border-b border-zinc-100 pb-5">
+                <div className="flex flex-col">
+                  <span className="text-xl font-black tracking-tighter text-zinc-950">
+                    JOHNNY HAIR LAB
+                  </span>
+                  <span className="text-[9px] uppercase tracking-widest text-zinc-500 font-bold mt-0.5">
+                    Premium Barbershop
+                  </span>
+                </div>
+                <button
+                  onClick={() => setIsMenuOpen(false)}
+                  className="text-zinc-400 hover:text-zinc-900 p-1 -mr-2 transition-colors"
+                >
+                  <X size={28} />
+                </button>
+              </div>
+
+              {/* CENTER: Τα Hooks Πλοήγησης (Σωστή Σειρά) */}
+              <nav className="flex flex-col gap-6 text-lg font-medium text-zinc-700 flex-1">
                 <a
                   href="#about"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-zinc-950 transition-colors"
                 >
                   {currentT.nav.about}
-                </a>
-                <a
-                  href="#services"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="hover:text-zinc-950 transition-colors"
-                >
-                  {currentT.nav.services}
                 </a>
                 <a
                   href="#gallery"
@@ -263,12 +278,35 @@ export default function ClientHome({
                   {currentT.nav.gallery}
                 </a>
                 <a
+                  href="#services"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="hover:text-zinc-950 transition-colors"
+                >
+                  {currentT.nav.services}
+                </a>
+                <a
                   href="#products"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-zinc-950 transition-colors"
                 >
                   {currentT.nav.products}
                 </a>
+              </nav>
+
+              {/* BOTTOM: Επιλογή Γλώσσας */}
+              <div className="border-t border-zinc-100 pt-6 mt-auto flex justify-between items-center">
+                <span className="text-xs font-medium text-zinc-500 uppercase tracking-widest">
+                  Language
+                </span>
+                <button
+                  onClick={() => setLang(lang === "el" ? "en" : "el")}
+                  className="flex items-center gap-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 px-4 py-2 rounded-full transition-colors"
+                >
+                  <Globe size={18} className="text-zinc-500" />
+                  <span className="font-bold text-sm tracking-wider">
+                    {lang === "el" ? "EN" : "EL"}
+                  </span>
+                </button>
               </div>
             </motion.div>
           </>
@@ -299,12 +337,10 @@ export default function ClientHome({
           <div className="flex items-center gap-3 z-10">
             <button
               onClick={() => setLang(lang === "el" ? "en" : "el")}
-              className="flex items-center gap-1.5 p-2 text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors text-sm font-semibold uppercase tracking-wider"
+              className="hidden sm:flex items-center gap-1.5 p-2 text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors text-sm font-semibold uppercase tracking-wider"
             >
               <Globe size={18} />
-              <span className="hidden sm:inline">
-                {lang === "el" ? "EN" : "EL"}
-              </span>
+              <span>{lang === "el" ? "EN" : "EL"}</span>
             </button>
             <a
               href="https://www.fresha.com/el/a/johnny-hair-lab-thessaloniki-g-mpakatseloy-3-k2h0s017?pId=2559153"
@@ -373,7 +409,7 @@ export default function ClientHome({
       {/* ABOUT US */}
       <section
         id="about"
-        className="py-24 bg-zinc-50 relative z-20 shadow-[0_-20px_30px_-15px_rgba(0,0,0,0.05)]"
+        className="py-24 bg-zinc-50 relative z-20 shadow-[0_-20px_30px_-15px_rgba(0,0,0,0.05)] scroll-mt-24"
       >
         <motion.div
           initial={{ opacity: 0, y: 40 }}
@@ -394,7 +430,7 @@ export default function ClientHome({
       {/* 3D GALLERY */}
       <section
         id="gallery"
-        className="py-24 bg-zinc-100 overflow-hidden relative z-20"
+        className="py-24 bg-zinc-100 overflow-hidden relative z-20 scroll-mt-24"
       >
         <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
@@ -458,7 +494,10 @@ export default function ClientHome({
       </section>
 
       {/* SERVICES */}
-      <section id="services" className="py-24 bg-white relative z-20">
+      <section
+        id="services"
+        className="py-24 bg-white relative z-20 scroll-mt-24"
+      >
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl font-bold tracking-tight text-zinc-900 mb-16 text-center">
             {currentT.services.title}
@@ -508,7 +547,10 @@ export default function ClientHome({
       </section>
 
       {/* PRODUCTS CAROUSEL */}
-      <section id="products" className="py-24 bg-zinc-50 relative z-20">
+      <section
+        id="products"
+        className="py-24 bg-zinc-50 relative z-20 scroll-mt-24"
+      >
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
@@ -664,7 +706,7 @@ export default function ClientHome({
               </div>
             </div>
           </div>
-          <div className="w-full h-[400px] md:h-full grayscale hover:grayscale-0 transition-all duration-700">
+          <div className="w-full h-[400px] md:h-full md:grayscale md:hover:grayscale-0 grayscale-0 transition-all duration-500">
             <iframe
               src="https://maps.google.com/maps?q=Johnny+Hair+Lab,+Thessaloniki&t=&z=16&ie=UTF8&iwloc=&output=embed"
               width="100%"
