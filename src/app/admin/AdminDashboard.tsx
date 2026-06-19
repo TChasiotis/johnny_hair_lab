@@ -289,8 +289,14 @@ export default function AdminDashboard({
                         </button>
                         <button
                           onClick={async () => {
-                            await deleteService(service.id);
-                            router.refresh();
+                            if (
+                              window.confirm(
+                                `Σίγουρα θέλετε να διαγράψετε την υπηρεσία "${service.name}";\nΗ ενέργεια δεν μπορεί να αναιρεθεί.`,
+                              )
+                            ) {
+                              await deleteService(service.id);
+                              router.refresh();
+                            }
                           }}
                           className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                         >
@@ -375,8 +381,14 @@ export default function AdminDashboard({
                         </button>
                         <button
                           onClick={async () => {
-                            await deleteProduct(product.id);
-                            router.refresh();
+                            if (
+                              window.confirm(
+                                `Σίγουρα θέλετε να διαγράψετε το προϊόν "${product.name}";\nΗ ενέργεια δεν μπορεί να αναιρεθεί.`,
+                              )
+                            ) {
+                              await deleteProduct(product.id);
+                              router.refresh();
+                            }
                           }}
                           className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
                         >

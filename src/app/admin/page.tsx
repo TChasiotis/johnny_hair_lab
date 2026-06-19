@@ -28,6 +28,7 @@ export default async function AdminPage() {
 
   const monthlyUploadsCount = await prisma.product.count({
     where: {
+      custom: true,
       createdAt: {
         gte: startOfBillingCycle,
       },

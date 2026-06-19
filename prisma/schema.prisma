@@ -32,11 +32,13 @@ model Service {
 model Product {
   id        String   @id @default(cuid())
   name      String
-  desc      String
-  descEn    String   @default("")
   price     String
+  desc      String
+  descEn    String?
   img       String
   category  String
-  sortOrder Int      @default(0) // Νέο πεδίο για χειροκίνητη ταξινόμηση
+  sortOrder Int      @default(0)
+  custom    Boolean  @default(true)
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
