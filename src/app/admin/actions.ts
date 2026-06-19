@@ -95,28 +95,33 @@ export async function moveService(id: string, direction: "up" | "down") {
 // --- ΠΡΟΪΟΝΤΑ (PRODUCTS) ---
 
 export async function createProduct(formData: FormData) {
-  const name = formData.get("name") as string;
-  const price = formData.get("price") as string;
-  const desc = formData.get("desc") as string;
-  const descEn = formData.get("descEn") as string;
-  const category = formData.get("category") as string;
-  const file = formData.get("file") as File;
-  const useRemoveBg = formData.get("useRemoveBg") === "true";
+  try {
+    const name = formData.get("name") as string;
+    const price = formData.get("price") as string;
+    const desc = formData.get("desc") as string;
+    const descEn = formData.get("descEn") as string;
+    const category = formData.get("category") as string;
+    const file = formData.get("file") as File;
+    const useRemoveBg = formData.get("useRemoveBg") === "true";
 
-  let imgPath = "./products/default.png";
+    console.log("--> [1/4] Ξεκίνησε η δημιουργία προϊόντος:", name);
 
-  if (file && file.size > 0) {
-    const buffer = Buffer.from(await file.arrayBuffer());
-    let finalBuffer = buffer;
-    const apiKey = process.env.REMOVE_BG_API_KEY;
-    let fileNameToSave = file.name;
+    let imgPath = "./products/default.png";
 
-    // 1. Τρέχει το AI αν το toggle είναι ανοιχτό
-    if (useRemoveBg && apiKey) {
-      try {
+    if (file && file.size > 0) {
+      console.log(
+        `--> Βρέθηκε αρχείο: ${file.name} | Μέγεθος: ${file.size} bytes`,
+      );
+
+      // Αντί για Buffer, κρατάμε το αρχείο στην αρχική του μορφή ή ως ArrayBuffer
+      let finalData: File | ArrayBuffer = file;
+      let fileNameToSave = file.name;
+      const apiKey = process.env.REMOVE_BG_API_KEY;
+
+      if (useRemoveBg && apiKey) {
+        console.log("--> [2/4] Γίνεται κλήση στο Remove.bg...");
         const apiFormData = new FormData();
-        const blob = new Blob([buffer], { type: file.type });
-        apiFormData.append("image_file", blob, file.name);
+        apiFormData.append("image_file", file);
         apiFormData.append("size", "preview");
 
         const apiResponse = await fetch("https://api.remove.bg/v1.0/removebg", {
@@ -126,48 +131,53 @@ export async function createProduct(formData: FormData) {
         });
 
         if (apiResponse.ok) {
-          const arrayBuffer = await apiResponse.arrayBuffer();
-          finalBuffer = Buffer.from(arrayBuffer);
-          fileNameToSave = `nobg_${file.name}.png`; // Αλλάζουμε κατάληξη αν βγήκε το φόντο
+          console.log("--> Το Remove.bg πέτυχε!");
+          finalData = await apiResponse.arrayBuffer(); // Παίρνουμε το καθαρό αρχείο
+          fileNameToSave = `nobg_${file.name}.png`;
         } else {
-          console.error("Σφάλμα API:", await apiResponse.text());
+          console.error("--> Σφάλμα από Remove.bg:", await apiResponse.text());
         }
-      } catch (err) {
-        console.error("Αποτυχία σύνδεσης API:", err);
       }
+
+      console.log("--> [3/4] Ανέβασμα στο Vercel Blob...");
+      const uniqueFilename = `${Date.now()}-${fileNameToSave.replace(/\s+/g, "_")}`;
+
+      // Ανεβάζουμε απευθείας το finalData (χωρίς να μπλέκουμε Node.js Buffers)
+      const blobResponse = await put(uniqueFilename, finalData, {
+        access: "public",
+        token: process.env.BLOB_READ_WRITE_TOKEN, // Το δηλώνουμε ρητά για σιγουριά
+      });
+
+      console.log("--> Το Blob ανέβηκε επιτυχώς στο URL:", blobResponse.url);
+      imgPath = blobResponse.url;
     }
 
-    // 2. ΑΝΕΒΑΣΜΑ ΣΤΟ VERCEL BLOB
-    const uniqueFilename = `${Date.now()}-${fileNameToSave.replace(/\s+/g, "_")}`;
+    console.log("--> [4/4] Αποθήκευση στη βάση δεδομένων (Neon)...");
+    const maxProduct = await prisma.product.findFirst({
+      orderBy: { sortOrder: "desc" },
+    });
+    const nextOrder = (maxProduct?.sortOrder || 0) + 1;
 
-    // Η εντολή put() ανεβάζει το αρχείο και επιστρέφει το URL του
-    const blobResponse = await put(uniqueFilename, finalBuffer, {
-      access: "public", // Κάνουμε την εικόνα δημόσια για να φαίνεται στο site
+    await prisma.product.create({
+      data: {
+        name,
+        price,
+        img: imgPath,
+        desc,
+        descEn,
+        category: category || "care",
+        sortOrder: nextOrder,
+      },
     });
 
-    // Παίρνουμε το καθαρό URL που μας δίνει η Vercel
-    imgPath = blobResponse.url;
+    console.log("--> [ΕΠΙΤΥΧΙΑ] Το προϊόν αποθηκεύτηκε! Γίνεται refresh...");
+    revalidatePath("/admin");
+    revalidatePath("/");
+  } catch (error: any) {
+    // ΑΝ ΚΑΤΙ ΣΚΑΣΕΙ, ΘΑ ΤΥΠΩΘΕΙ ΑΥΤΟ ΣΤΑ LOGS ΤΟΥ VERCEL!
+    console.error("!!! ΚΡΙΣΙΜΟ ΣΦΑΛΜΑ ΣΤΟ CREATE PRODUCT !!!", error);
+    throw new Error("Αποτυχία δημιουργίας προϊόντος. Δες τα Vercel Logs.");
   }
-
-  const maxProduct = await prisma.product.findFirst({
-    orderBy: { sortOrder: "desc" },
-  });
-  const nextOrder = (maxProduct?.sortOrder || 0) + 1;
-
-  await prisma.product.create({
-    data: {
-      name,
-      price,
-      img: imgPath,
-      desc,
-      descEn,
-      category: category || "care",
-      sortOrder: nextOrder,
-    },
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/");
 }
 export async function updateProduct(id: string, data: any) {
   await prisma.product.update({
