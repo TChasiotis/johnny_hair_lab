@@ -11,9 +11,9 @@ import {
   Menu,
   X,
   Star,
+  Globe,
 } from "lucide-react";
 
-// Δηλώνουμε ότι το component περιμένει να λάβει τα services και products
 export default function ClientHome({
   services,
   products,
@@ -23,6 +23,7 @@ export default function ClientHome({
 }) {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [lang, setLang] = useState<"el" | "en">("el");
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -30,6 +31,76 @@ export default function ClientHome({
     damping: 30,
     restDelta: 0.001,
   });
+
+  // --- ΛΕΞΙΚΟ ΣΤΑΤΙΚΩΝ ΚΕΙΜΕΝΩΝ ---
+  const t = {
+    el: {
+      nav: {
+        about: "Σχετικά",
+        services: "Υπηρεσίες",
+        gallery: "Έργα",
+        products: "Προϊόντα",
+        book: "Κράτηση",
+      },
+      hero: { address: "Γ. Μπακατσέλου 3" },
+      about: {
+        title: "Η Φιλοσοφια Μας",
+        text: "Στην καρδιά της Θεσσαλονίκης, το Johnny Hair Lab προσφέρει μια μοναδική εμπειρία κουρέματος, με έμφαση στην ποιότητα και την περιβαλλοντική συνείδηση. Δημιουργούμε στυλ που αποπνέουν αυτοπεποίθηση, φροντίζοντας κάθε πελάτη με φιλική προσέγγιση.",
+      },
+      gallery: { title: "Το Αποτέλεσμα" },
+      services: { title: "Υπηρεσίες" },
+      products: {
+        title: "Προϊόντα Περιποίησης",
+        sub: "Συντήρησε το αποτέλεσμα και στο σπίτι.",
+      },
+      reviews: {
+        title: "Τι λένε οι πελάτες μας",
+      },
+      contact: {
+        title: "Επικοινωνία & Ωράριο",
+        address1: "Γ. Μπακατσέλου 3",
+        address2: "Θεσσαλονίκη, 54624",
+        days: "Δευ - Παρ",
+        sat: "Σάββατο",
+        sun: "Κυριακή",
+        closed: "Κλειστά",
+      },
+    },
+    en: {
+      nav: {
+        about: "About",
+        services: "Services",
+        gallery: "Gallery",
+        products: "Products",
+        book: "Book Now",
+      },
+      hero: { address: "3 G. Mpakatselou St." },
+      about: {
+        title: "Our Philosophy",
+        text: "In the heart of Thessaloniki, Johnny Hair Lab offers a unique grooming experience, focusing on quality and environmental consciousness. We create styles that exude confidence, treating every client with a friendly approach.",
+      },
+      gallery: { title: "Our Work" },
+      services: { title: "Services" },
+      products: {
+        title: "Grooming Products",
+        sub: "Maintain the look at home.",
+      },
+      reviews: {
+        title: "What our clients say",
+      },
+      contact: {
+        title: "Contact & Hours",
+        address1: "3 G. Mpakatselou St.",
+        address2: "Thessaloniki, 54624",
+        days: "Mon - Fri",
+        sat: "Saturday",
+        sun: "Sunday",
+        closed: "Closed",
+      },
+    },
+  };
+
+  const currentT = t[lang];
 
   const galleryImages = [
     "./scshots/scshot1.png",
@@ -40,22 +111,77 @@ export default function ClientHome({
     "./scshots/scshot6.png",
   ];
 
+  // Δεδομένα των πραγματικών κριτικών με ενσωματωμένες τις μεταφράσεις
   const reviews = [
     {
-      name: "Γιώργος Π.",
-      text: "Το καλύτερο σβήσιμο στην πόλη. Καθαρός χώρος και φοβερά παιδιά.",
+      name: "Κωνσταντίνος",
+      text: {
+        el: "Άνετα το καλύτερο κουρείο στην Θεσσαλονίκη πολύ φιλικό περιβάλλον και ο τζονι ο καλύτερος κουρέας ότι κούρεμα κι αν ζητήσετε θα έχετε το καλύτερο αποτέλεσμα.",
+        en: "Άνετα το καλύτερο κουρείο στην Θεσσαλονίκη πολύ φιλικό περιβάλλον και ο τζονι ο καλύτερος κουρέας... (Easily the best barbershop in Thessaloniki, very friendly environment and Johnny is the best barber. Whatever haircut you ask for, you will get the best result.)",
+      },
     },
     {
-      name: "Νίκος Κ.",
-      text: "Επαγγελματίας με τα όλα του. Δίνει προσοχή στη λεπτομέρεια. Προτείνεται ανεπιφύλακτα!",
+      name: "Marina Asmr",
+      text: {
+        el: "Amazing haircut and the barber is a lovely person!! My son was extremely happy with the result. I highly recommend it💯❤️💈 (Καταπληκτικό κούρεμα και ο κουρέας είναι υπέροχος άνθρωπος!! Ο γιος μου έμεινε εξαιρετικά ευχαριστημένος με το αποτέλεσμα. Το συνιστώ ανεπιφύλακτα💯❤️💈)",
+        en: "Amazing haircut and the barber is a lovely person!! My son was extremely happy with the result. I highly recommend it💯❤️💈",
+      },
     },
     {
-      name: "Δημήτρης Α.",
-      text: "Άψογη εξυπηρέτηση και το μαγαζί τα σπάει από αισθητική. 5 αστέρια με κλειστά μάτια.",
+      name: "Απόστολος ΠΑΠΑΤΣΙΜΠΑΣ",
+      text: {
+        el: "Ακραία και σταθερά και κουρέματα, πολύ ευγενικός και ο ίδιος ο κουρέας αξίζει χωρίς αμφιβολία!!🔥🔥",
+        en: "Ακραία και σταθερά και κουρέματα, πολύ ευγενικός και ο ίδιος ο κουρέας... (Extreme and consistent haircuts, the barber himself is very polite, totally worth it without a doubt!!🔥🔥)",
+      },
     },
     {
-      name: "Κώστας Μ.",
-      text: "Ο Γιάννης είναι καλλιτέχνης. Επιτέλους βρήκα τον μπαρμπέρη μου.",
+      name: "Christian Fraedrich",
+      text: {
+        el: "Alles perfekt. Super nett und sehr guter Service (Όλα τέλεια. Σούπερ ευγενικός και πολύ καλή εξυπηρέτηση)",
+        en: "Alles perfekt. Super nett und sehr guter Service (Everything perfect. Super nice and very good service)",
+      },
+    },
+    {
+      name: "Γιάννης Χελάς",
+      text: {
+        el: "Είναι ένα από τα καλύτερα κουρεία στην πόλη! Ο χώρος είναι καθαρός, ο Τζόνι πάντα εξυπηρετικός, χαμογελαστός, ευδιάθετος και φιλικός με όλους. Κάνει το κούρεμα μία ευχάριστη εμπειρία, μέσα από την κουβέντα, την περιποίηση και πάντοτε κοιτάζει να αφήσει τον κάθε πελάτη ικανοποιημένο...",
+        en: "Είναι ένα από τα καλύτερα κουρεία στην πόλη... (One of the best barbershops in town! The place is clean, Johnny is always helpful, smiling, cheerful, and friendly. He makes the haircut a pleasant experience through conversation and always leaves every customer satisfied...)",
+      },
+    },
+    {
+      name: "Χρηστος Σοφος",
+      text: {
+        el: "Great haircut. Trustworthy barber that knows what suits you. Never even had to say what haircut I wanted I just sit on the chair and let him do what he wants. (Υπέροχο κούρεμα. Αξιόπιστος κουρέας που ξέρει τι σου ταιριάζει. Δεν χρειάστηκε καν να πω τι κούρεμα ήθελα, απλά κάθομαι στην καρέκλα και τον αφήνω να κάνει ό,τι θέλει.)",
+        en: "Great haircut. Trustworthy barber that knows what suits you. Never even had to say what haircut I wanted I just sit on the chair and let him do what he wants.",
+      },
+    },
+    {
+      name: "κωστας ζαραγκουλιας",
+      text: {
+        el: "Παρά πολύ καλός στη δουλειά του εξυπηρετικός, με το χαμόγελο πάντα και πρόθυμος να ακούσει την άποψη σου αν δεν σου αρέσει κάτι!!!",
+        en: "Παρά πολύ καλός στη δουλειά του... (Very good at his job, helpful, always with a smile and willing to listen to your opinion if you don't like something!!!)",
+      },
+    },
+    {
+      name: "Αλέξανδρος Χαραλαμπιδης",
+      text: {
+        el: "Παρά πολύ όμορφα διαμορφωμένος χώρος με πολύ καλή εξυπηρέτηση. Πολύ καλή επικοινωνία, γρήγορο κούρεμα και φεύγεις γνωρίζοντας πως είσαι κουρεμένος ακριβώς όπως το ζήτησες!!!",
+        en: "Παρά πολύ όμορφα διαμορφωμένος χώρος... (Beautifully designed space with very good service. Great communication, quick haircut, and you leave knowing you got exactly the haircut you asked for!!!)",
+      },
+    },
+    {
+      name: "Kon Kan",
+      text: {
+        el: "Εξαιρετικό ταλέντο στη κομμωτική τέχνη. Γρηγορη εξυπηρέτηση και αξιοπιστία. Τον συνιστώ ανεπιφύλακτα σε όλους!!!!",
+        en: "Εξαιρετικό ταλέντο στη κομμωτική τέχνη... (Exceptional talent in hairdressing. Fast service and reliability. I highly recommend him to everyone!!!!)",
+      },
+    },
+    {
+      name: "eraldi dervishaj",
+      text: {
+        el: "Από τα καλύτερα κουρέματα που μου έχουν κάνει με λεπτομέρεια και άριστο αποτέλεσμα συνιστώ σε όλους.",
+        en: "Από τα καλύτερα κουρέματα που μου έχουν κάνει... (One of the best haircuts I've ever had, detailed with excellent results, I recommend it to everyone.)",
+      },
     },
   ];
 
@@ -65,7 +191,6 @@ export default function ClientHome({
     setGalleryIndex(
       (prev) => (prev - 1 + galleryImages.length) % galleryImages.length,
     );
-
   const handleDragEnd = (event: any, info: any) => {
     if (info.offset.x < -50) nextImage();
     else if (info.offset.x > 50) prevImage();
@@ -121,28 +246,28 @@ export default function ClientHome({
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-zinc-950 transition-colors"
                 >
-                  Σχετικά
+                  {currentT.nav.about}
                 </a>
                 <a
                   href="#services"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-zinc-950 transition-colors"
                 >
-                  Υπηρεσίες
+                  {currentT.nav.services}
                 </a>
                 <a
                   href="#gallery"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-zinc-950 transition-colors"
                 >
-                  Έργα
+                  {currentT.nav.gallery}
                 </a>
                 <a
                   href="#products"
                   onClick={() => setIsMenuOpen(false)}
                   className="hover:text-zinc-950 transition-colors"
                 >
-                  Προϊόντα
+                  {currentT.nav.products}
                 </a>
               </div>
             </motion.div>
@@ -170,14 +295,26 @@ export default function ClientHome({
               className="h-full object-contain"
             />
           </div>
-          <a
-            href="https://www.fresha.com/el/a/johnny-hair-lab-thessaloniki-g-mpakatseloy-3-k2h0s017?pId=2559153"
-            target="_blank"
-            rel="noreferrer"
-            className="bg-zinc-950 text-white px-6 py-2.5 rounded text-sm font-medium hover:bg-zinc-800 transition-colors z-10"
-          >
-            Κράτηση
-          </a>
+
+          <div className="flex items-center gap-3 z-10">
+            <button
+              onClick={() => setLang(lang === "el" ? "en" : "el")}
+              className="flex items-center gap-1.5 p-2 text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors text-sm font-semibold uppercase tracking-wider"
+            >
+              <Globe size={18} />
+              <span className="hidden sm:inline">
+                {lang === "el" ? "EN" : "EL"}
+              </span>
+            </button>
+            <a
+              href="https://www.fresha.com/el/a/johnny-hair-lab-thessaloniki-g-mpakatseloy-3-k2h0s017?pId=2559153"
+              target="_blank"
+              rel="noreferrer"
+              className="bg-zinc-950 text-white px-5 py-2.5 rounded text-sm font-medium hover:bg-zinc-800 transition-colors"
+            >
+              {currentT.nav.book}
+            </a>
+          </div>
         </div>
       </motion.nav>
 
@@ -190,8 +327,7 @@ export default function ClientHome({
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-5xl md:text-8xl font-extrabold tracking-tighter text-zinc-900 mb-6 drop-shadow-sm"
           >
-            JOHNNY
-            <br className="md:hidden" /> HAIR LAB
+            JOHNNY <br className="md:hidden" /> HAIR LAB
           </motion.h1>
           <motion.div
             initial={{ y: 30, opacity: 0 }}
@@ -200,7 +336,7 @@ export default function ClientHome({
             className="flex flex-col sm:flex-row items-center justify-center gap-4 text-zinc-800 font-bold flex-wrap"
           >
             <span className="flex items-center gap-2">
-              <MapPin size={18} /> Γ. Μπακατσέλου 3
+              <MapPin size={18} /> {currentT.hero.address}
             </span>
             <span className="hidden sm:block text-zinc-400">|</span>
             <span className="flex items-center gap-2">
@@ -247,16 +383,10 @@ export default function ClientHome({
           className="max-w-3xl mx-auto px-6 text-center"
         >
           <h2 className="text-sm font-bold tracking-widest text-zinc-400 uppercase mb-8">
-            Η Φιλοσοφια Μας
+            {currentT.about.title}
           </h2>
           <p className="text-xl md:text-2xl leading-relaxed text-zinc-700 font-medium">
-            Στην καρδιά της Θεσσαλονίκης, το{" "}
-            <span className="text-zinc-950 font-bold">Johnny Hair Lab</span>{" "}
-            προσφέρει μια μοναδική εμπειρία κουρέματος, με έμφαση στην ποιότητα
-            και την περιβαλλοντική συνείδηση. Δημιουργούμε στυλ που αποπνέουν
-            αυτοπεποίθηση, φροντίζοντας κάθε πελάτη με φιλική προσέγγιση.
-            Επιλέγοντας φυσικά προϊόντα, συνδυάζουμε τη μόδα με την οικολογική
-            υπευθυνότητα.
+            {currentT.about.text}
           </p>
         </motion.div>
       </section>
@@ -268,7 +398,7 @@ export default function ClientHome({
       >
         <div className="max-w-7xl mx-auto px-6 mb-16 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
-            Το Αποτέλεσμα
+            {currentT.gallery.title}
           </h2>
         </div>
         <div className="relative h-[60vh] md:h-[70vh] flex items-center justify-center max-w-5xl mx-auto px-6 cursor-grab active:cursor-grabbing">
@@ -331,31 +461,48 @@ export default function ClientHome({
       <section id="services" className="py-24 bg-white relative z-20">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-3xl font-bold tracking-tight text-zinc-900 mb-16 text-center">
-            Υπηρεσίες
+            {currentT.services.title}
           </h2>
           <div className="grid md:grid-cols-2 gap-x-16 gap-y-10">
-            {services.map((service, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05, duration: 0.4 }}
-                className="flex flex-col border-b border-zinc-100 pb-4 group"
-              >
-                <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-zinc-600 transition-colors">
-                    {service.name}
-                  </h3>
-                  <span className="text-lg font-bold text-zinc-900">
-                    {service.price}
+            {services.map((service, index) => {
+              const sName =
+                lang === "el" ? service.name : service.nameEn || service.name;
+              const sPrice =
+                lang === "el"
+                  ? service.price
+                  : service.priceEn || service.price;
+
+              const formattedDurationEl = service.duration
+                ?.replace("λ.", "min")
+                ?.replace("ώ.", "h");
+              const sDuration =
+                lang === "el"
+                  ? formattedDurationEl
+                  : service.durationEn || formattedDurationEl;
+
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.05, duration: 0.4 }}
+                  className="flex flex-col border-b border-zinc-100 pb-4 group"
+                >
+                  <div className="flex justify-between items-baseline mb-1">
+                    <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-zinc-600 transition-colors">
+                      {sName}
+                    </h3>
+                    <span className="text-lg font-bold text-zinc-900">
+                      {sPrice}
+                    </span>
+                  </div>
+                  <span className="text-sm text-zinc-500 flex items-center gap-1">
+                    <Clock size={14} /> {sDuration}
                   </span>
-                </div>
-                <span className="text-sm text-zinc-500 flex items-center gap-1">
-                  <Clock size={14} /> {service.duration}
-                </span>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -365,44 +512,42 @@ export default function ClientHome({
         <div className="max-w-7xl mx-auto px-6">
           <div className="mb-12 text-center">
             <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
-              Προϊόντα Περιποίησης
+              {currentT.products.title}
             </h2>
-            <p className="text-zinc-500 mt-2">
-              Συντήρησε το αποτέλεσμα και στο σπίτι.
-            </p>
+            <p className="text-zinc-500 mt-2">{currentT.products.sub}</p>
           </div>
           <div
             className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            <style
-              dangerouslySetInnerHTML={{
-                __html: `::-webkit-scrollbar { display: none; }`,
-              }}
-            />
-            {products.map((product, index) => (
-              <div
-                key={index}
-                className="flex-none w-[75vw] sm:w-[40vw] md:w-[280px] snap-center bg-white rounded-2xl p-6 shadow-sm border border-zinc-100 flex flex-col items-center text-center"
-              >
-                <div className="w-full h-56 bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={product.img}
-                    alt={product.name}
-                    className="w-full h-full object-contain drop-shadow-md"
-                  />
+            {products.map((product, index) => {
+              const pDesc =
+                lang === "el" ? product.desc : product.descEn || product.desc;
+
+              return (
+                <div
+                  key={index}
+                  className="flex-none w-[75vw] sm:w-[40vw] md:w-[280px] snap-center bg-white rounded-2xl p-6 shadow-sm border border-zinc-100 flex flex-col items-center text-center"
+                >
+                  <div className="w-full h-56 bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={product.img}
+                      alt={product.name}
+                      className="w-full h-full object-contain drop-shadow-md"
+                    />
+                  </div>
+                  <h3 className="font-semibold text-zinc-900 mb-2">
+                    {product.name}
+                  </h3>
+                  <p className="text-sm text-zinc-500 mb-4 flex-grow">
+                    {pDesc}
+                  </p>
+                  <span className="text-lg font-bold text-zinc-900">
+                    {product.price}
+                  </span>
                 </div>
-                <h3 className="font-semibold text-zinc-900 mb-2">
-                  {product.name}
-                </h3>
-                <p className="text-sm text-zinc-500 mb-4 flex-grow">
-                  {product.desc}
-                </p>
-                <span className="text-lg font-bold text-zinc-900">
-                  {product.price}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -421,11 +566,8 @@ export default function ClientHome({
               ))}
             </div>
             <h2 className="text-3xl font-bold tracking-tight">
-              Τι λένε οι πελάτες μας
+              {currentT.reviews.title}
             </h2>
-            <p className="text-zinc-400 mt-2">
-              121 κριτικές · 5.0 Αστέρια στο Google
-            </p>
           </div>
           <div
             className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-8"
@@ -446,7 +588,7 @@ export default function ClientHome({
                   ))}
                 </div>
                 <p className="text-zinc-300 italic mb-6 leading-relaxed">
-                  "{review.text}"
+                  "{review.text[lang]}"
                 </p>
                 <p className="font-semibold text-white">- {review.name}</p>
               </div>
@@ -459,13 +601,16 @@ export default function ClientHome({
       <section className="bg-zinc-950 text-white relative z-20">
         <div className="grid md:grid-cols-2 min-h-[500px]">
           <div className="p-12 flex flex-col justify-center bg-zinc-950 border-t border-zinc-900">
-            <h3 className="text-2xl font-bold mb-8">Επικοινωνία & Ωράριο</h3>
+            <h3 className="text-2xl font-bold mb-8">
+              {currentT.contact.title}
+            </h3>
             <div className="space-y-6 text-zinc-400">
               <div className="flex items-start gap-4">
                 <MapPin className="text-white mt-1" />
                 <p>
-                  Γ. Μπακατσέλου 3<br />
-                  Θεσσαλονίκη, 54624
+                  {currentT.contact.address1}
+                  <br />
+                  {currentT.contact.address2}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -502,22 +647,23 @@ export default function ClientHome({
                 <Clock className="text-white mt-1" />
                 <ul className="space-y-1 w-full max-w-[250px]">
                   <li className="flex justify-between">
-                    <span>Δευ - Παρ:</span>{" "}
+                    <span>{currentT.contact.days}:</span>{" "}
                     <span className="text-white">10:00 - 21:00</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>Σάββατο:</span>{" "}
+                    <span>{currentT.contact.sat}:</span>{" "}
                     <span className="text-white">09:00 - 18:00</span>
                   </li>
                   <li className="flex justify-between">
-                    <span>Κυριακή:</span>{" "}
-                    <span className="text-zinc-600">Κλειστά</span>
+                    <span>{currentT.contact.sun}:</span>{" "}
+                    <span className="text-zinc-600">
+                      {currentT.contact.closed}
+                    </span>
                   </li>
                 </ul>
               </div>
             </div>
           </div>
-
           <div className="w-full h-[400px] md:h-full grayscale hover:grayscale-0 transition-all duration-700">
             <iframe
               src="https://maps.google.com/maps?q=Johnny+Hair+Lab,+Thessaloniki&t=&z=16&ie=UTF8&iwloc=&output=embed"

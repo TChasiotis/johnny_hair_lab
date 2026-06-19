@@ -14,15 +14,18 @@ model User {
   username  String   @unique
   password  String   // Εδώ θα αποθηκευτεί το bcrypt hash
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // 2. Πίνακας για τις Υπηρεσίες του κουρείου
 model Service {
-  id        String   @id @default(cuid())
-  name      String
-  duration  String   // π.χ. "30 λ." ή "1 ώ."
-  price     String   // π.χ. "12 €" ή "από 40 €"
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  nameEn     String   @default("")
+  duration   String   // Ένα κοινό πεδίο για όλους (π.χ. "30 min")
+  price      String   // Ένα κοινό πεδίο για όλους (π.χ. "15 €")
+  sortOrder  Int      @default(0) // Νέο πεδίο για χειροκίνητη ταξινόμηση
+  createdAt  DateTime @default(now())
 }
 
 // 3. Πίνακας για τα Προϊόντα (Lavish Care, κλπ)
@@ -30,8 +33,10 @@ model Product {
   id        String   @id @default(cuid())
   name      String
   desc      String
+  descEn    String   @default("")
   price     String
-  img       String   // Το URL της εικόνας
-  category  String   // π.χ. "waxes", "shampoos", "prep"
+  img       String
+  category  String
+  sortOrder Int      @default(0) // Νέο πεδίο για χειροκίνητη ταξινόμηση
   createdAt DateTime @default(now())
 }
