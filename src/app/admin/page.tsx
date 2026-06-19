@@ -13,7 +13,6 @@ export default async function AdminPage() {
     redirect("/login");
   }
 
-  // Μηδενισμός στις 19 κάθε μήνα
   const now = new Date();
   const resetDay = 19;
   let startOfBillingCycle;
@@ -43,10 +42,16 @@ export default async function AdminPage() {
     orderBy: { sortOrder: "asc" },
   });
 
+  // Τραβάμε και τις φωτογραφίες γκαλερί
+  const gallery = await prisma.galleryImage.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+
   return (
     <AdminDashboard
       initialServices={services}
       initialProducts={products}
+      initialGallery={gallery} // <-- Νέο Prop
       monthlyUploadsCount={monthlyUploadsCount}
     />
   );

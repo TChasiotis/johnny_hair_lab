@@ -2,12 +2,10 @@
 
 import prisma from "../lib/prisma";
 import { revalidatePath } from "next/cache";
-import fs from "fs";
-import path from "path";
 import { put, del } from "@vercel/blob";
+import bcrypt from "bcryptjs";
 
 // --- ΥΠΗΡΕΣΙΕΣ (SERVICES) ---
-
 export async function createService(data: any) {
   const maxService = await prisma.service.findFirst({
     orderBy: { sortOrder: "desc" },
@@ -93,7 +91,6 @@ export async function moveService(id: string, direction: "up" | "down") {
 }
 
 // --- ΠΡΟΪΟΝΤΑ (PRODUCTS) ---
-
 export async function createProduct(formData: FormData) {
   try {
     const name = formData.get("name") as string;
@@ -104,22 +101,15 @@ export async function createProduct(formData: FormData) {
     const file = formData.get("file") as File;
     const useRemoveBg = formData.get("useRemoveBg") === "true";
 
-    console.log("--> [1/4] Ξεκίνησε η δημιουργία προϊόντος:", name);
-
     let imgPath = "./products/default.png";
     let apiUsed = false;
 
     if (file && file.size > 0) {
-      console.log(
-        `--> Βρέθηκε αρχείο: ${file.name} | Μέγεθος: ${file.size} bytes`,
-      );
-
       let finalData: File | ArrayBuffer = file;
       let fileNameToSave = file.name;
       const apiKey = process.env.REMOVE_BG_API_KEY;
 
       if (useRemoveBg && apiKey) {
-        console.log("--> [2/4] Γίνεται κλήση στο Remove.bg...");
         const apiFormData = new FormData();
         apiFormData.append("image_file", file);
         apiFormData.append("size", "preview");
@@ -131,28 +121,21 @@ export async function createProduct(formData: FormData) {
         });
 
         if (apiResponse.ok) {
-          console.log("--> Το Remove.bg πέτυχε!");
           finalData = await apiResponse.arrayBuffer();
           fileNameToSave = `nobg_${file.name}.png`;
           apiUsed = true;
-        } else {
-          console.error("--> Σφάλμα από Remove.bg:", await apiResponse.text());
         }
       }
 
-      console.log("--> [3/4] Ανέβασμα στο Vercel Blob...");
       const uniqueFilename = `${Date.now()}-${fileNameToSave.replace(/\s+/g, "_")}`;
-
       const blobResponse = await put(uniqueFilename, finalData, {
         access: "public",
         token: process.env.BLOB_READ_WRITE_TOKEN,
       });
 
-      console.log("--> Το Blob ανέβηκε επιτυχώς:", blobResponse.url);
       imgPath = blobResponse.url;
     }
 
-    console.log("--> [4/4] Αποθήκευση στη βάση δεδομένων...");
     const maxProduct = await prisma.product.findFirst({
       orderBy: { sortOrder: "desc" },
     });
@@ -170,17 +153,14 @@ export async function createProduct(formData: FormData) {
       },
     });
 
-    // <--- Η ΔΙΟΡΘΩΣΗ: Προστέθηκε το { data: {} } για να μην "σκάει" το Prisma
     if (apiUsed) {
       await prisma.apiLog.create({ data: {} });
     }
 
-    console.log("--> [ΕΠΙΤΥΧΙΑ] Το προϊόν αποθηκεύτηκε! Γίνεται refresh...");
     revalidatePath("/admin");
     revalidatePath("/");
   } catch (error: any) {
-    console.error("!!! ΚΡΙΣΙΜΟ ΣΦΑΛΜΑ ΣΤΟ CREATE PRODUCT !!!", error);
-    throw new Error("Αποτυχία δημιουργίας προϊόντος. Δες τα Vercel Logs.");
+    throw new Error("Αποτυχία δημιουργίας προϊόντος.");
   }
 }
 
@@ -201,29 +181,14 @@ export async function updateProduct(id: string, data: any) {
 
 export async function deleteProduct(id: string) {
   try {
-    // 1. Βρίσκουμε το προϊόν για να πάρουμε το URL της εικόνας του
-    const product = await prisma.product.findUnique({
-      where: { id },
-    });
-
-    // 2. Αν υπάρχει εικόνα ΚΑΙ είναι ανεβασμένη στο Vercel Blob, τη διαγράφουμε
+    const product = await prisma.product.findUnique({ where: { id } });
     if (product?.img && product.img.includes("vercel-storage.com")) {
-      console.log("--> Διαγραφή αρχείου από Vercel Blob:", product.img);
-      await del(product.img, {
-        token: process.env.BLOB_READ_WRITE_TOKEN,
-      });
+      await del(product.img, { token: process.env.BLOB_READ_WRITE_TOKEN });
     }
-
-    // 3. Διαγράφουμε το προϊόν από τη βάση (Neon)
-    await prisma.product.delete({
-      where: { id },
-    });
-
-    console.log("--> Το προϊόν διαγράφηκε επιτυχώς!");
+    await prisma.product.delete({ where: { id } });
     revalidatePath("/admin");
     revalidatePath("/");
   } catch (error) {
-    console.error("Σφάλμα κατά τη διαγραφή προϊόντος:", error);
     throw new Error("Αποτυχία διαγραφής προϊόντος.");
   }
 }
@@ -232,7 +197,6 @@ export async function moveProduct(id: string, direction: "up" | "down") {
   const products = await prisma.product.findMany({
     orderBy: { sortOrder: "asc" },
   });
-
   const index = products.findIndex((p) => p.id === id);
   if (index === -1) return;
 
@@ -271,9 +235,49 @@ export async function moveProduct(id: string, direction: "up" | "down") {
   revalidatePath("/");
 }
 
-// Πρόσθεσε αυτό το import στην κορυφή του actions.ts αν δεν υπάρχει:
-import bcrypt from "bcryptjs";
+// --- ΓΚΑΛΕΡΙ (GALLERY ACTIONS) ---
+export async function createGalleryImage(formData: FormData) {
+  try {
+    const file = formData.get("file") as File;
+    if (!file || file.size === 0) return;
 
+    const uniqueFilename = `gallery-${Date.now()}-${file.name.replace(/\s+/g, "_")}`;
+    const blobResponse = await put(uniqueFilename, file, {
+      access: "public",
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
+
+    const maxImg = await prisma.galleryImage.findFirst({
+      orderBy: { sortOrder: "desc" },
+    });
+    const nextOrder = (maxImg?.sortOrder || 0) + 1;
+
+    await prisma.galleryImage.create({
+      data: { url: blobResponse.url, sortOrder: nextOrder },
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/");
+  } catch (error) {
+    throw new Error("Αποτυχία ανεβάσματος φωτογραφίας.");
+  }
+}
+
+export async function deleteGalleryImage(id: string) {
+  try {
+    const img = await prisma.galleryImage.findUnique({ where: { id } });
+    if (img?.url && img.url.includes("vercel-storage.com")) {
+      await del(img.url, { token: process.env.BLOB_READ_WRITE_TOKEN });
+    }
+    await prisma.galleryImage.delete({ where: { id } });
+    revalidatePath("/admin");
+    revalidatePath("/");
+  } catch (error) {
+    throw new Error("Αποτυχία διαγραφής φωτογραφίας.");
+  }
+}
+
+// --- ΡΥΘΜΙΣΕΙΣ ADMIN ---
 export async function updateAdminSettings(formData: FormData) {
   try {
     const newUsername = formData.get("username") as string;
@@ -287,60 +291,40 @@ export async function updateAdminSettings(formData: FormData) {
       };
     }
 
-    // Επειδή έχουμε μόνο έναν Admin στο σύστημα, παίρνουμε τον πρώτο χρήστη που βρίσκουμε
-    // (Αν το μοντέλο σου στο schema.prisma λέγεται 'admin' αντί για 'user', άλλαξέ το σε prisma.admin)
     const adminUser = await prisma.user.findFirst();
-
     if (!adminUser) {
       return {
         success: false,
-        error: "Δεν βρέθηκε ο λογαριασμός διαχειριστή στη βάση.",
+        error: "Δεν βρέθηκε ο λογαριασμός διαχειριστή.",
       };
     }
 
-    // Έλεγχος: Ταιριάζει ο παλιός κωδικός με αυτόν της βάσης;
     const isPasswordValid = await bcrypt.compare(
       oldPassword,
       adminUser.password,
     );
     if (!isPasswordValid) {
-      return {
-        success: false,
-        error: "Ο παλαιός κωδικός που πληκτρολογήσατε είναι λάθος.",
-      };
+      return { success: false, error: "Ο παλαιός κωδικός είναι λάθος." };
     }
 
-    // Φτιάχνουμε το αντικείμενο με τα δεδομένα που θα γίνουν update
-    const updateData: any = {
-      username: newUsername,
-    };
-
+    const updateData: any = { username: newUsername };
     let passwordChanged = false;
 
-    // Αν ο χρήστης συμπλήρωσε ΚΑΙ νέο κωδικό, τον κρυπτογραφούμε πριν τον σώσουμε
     if (newPassword && newPassword.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
-      const hashedNewPassword = await bcrypt.hash(newPassword, salt);
-      updateData.password = hashedNewPassword;
+      updateData.password = await bcrypt.hash(newPassword, salt);
       passwordChanged = true;
     }
 
-    // Ενημέρωση στη βάση (Neon)
-    await prisma.user.update({
-      where: { id: adminUser.id },
-      data: updateData,
-    });
-
-    // Καθαρισμός cache για να ανανεωθούν τα πάντα αμέσως
+    await prisma.user.update({ where: { id: adminUser.id }, data: updateData });
     revalidatePath("/admin");
 
     return {
       success: true,
-      message: "Οι αλλαγές αποθηκεύτηκαν επιτυχώς!",
+      message: "Οι αλλαγές αποθηκεύτηκαν!",
       passwordChanged,
     };
   } catch (error: any) {
-    console.error("Σφάλμα κατά την αλλαγή στοιχείων admin:", error);
-    return { success: false, error: "Κάτι πήγε στραβά. Δοκιμάστε ξανά." };
+    return { success: false, error: "Κάτι πήγε στραβά." };
   }
 }

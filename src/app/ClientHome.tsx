@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image"; // <-- Εισαγωγή του Image component
+import Image from "next/image";
 import {
   motion,
   AnimatePresence,
@@ -24,9 +24,11 @@ import {
 export default function ClientHome({
   services,
   products,
+  gallery = [], // <-- Νέο Prop
 }: {
   services: any[];
   products: any[];
+  gallery?: any[];
 }) {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -115,15 +117,18 @@ export default function ClientHome({
 
   const currentT = t[lang];
 
-  // Αλλαγή από './' σε '/' για να δουλεύει άψογα το next/image
-  const galleryImages = [
-    "/scshots/scshot1.png",
-    "/scshots/scshot2.png",
-    "/scshots/scshot3.png",
-    "/scshots/scshot4.png",
-    "/scshots/scshot5.png",
-    "/scshots/scshot6.png",
-  ];
+  // Αν υπάρχουν εικόνες στη βάση, παίρνει εκείνες. Αλλιώς, fallback στα screenshots
+  const galleryImages =
+    gallery.length > 0
+      ? gallery.map((img: any) => img.url)
+      : [
+          "./scshots/scshot1.png",
+          "./scshots/scshot2.png",
+          "./scshots/scshot3.png",
+          "./scshots/scshot4.png",
+          "./scshots/scshot5.png",
+          "./scshots/scshot6.png",
+        ];
 
   const reviews = [
     {
@@ -222,7 +227,7 @@ export default function ClientHome({
 
       <div className="fixed top-0 left-0 w-full h-screen z-0">
         <Image
-          src="/hero_section/hero_section_johnny_portrait.png"
+          src="./hero_section/hero_section_johnny_portrait.png"
           alt="Hero Mobile"
           fill
           priority
@@ -230,7 +235,7 @@ export default function ClientHome({
           className="block sm:hidden object-cover object-center"
         />
         <Image
-          src="/hero_section/hero_section_johnny.png"
+          src="./hero_section/hero_section_johnny.png"
           alt="Hero Desktop"
           fill
           priority
@@ -257,7 +262,6 @@ export default function ClientHome({
               transition={{ type: "tween", duration: 0.3 }}
               className="fixed top-0 left-0 h-full w-64 bg-white z-[80] shadow-2xl flex flex-col px-6 py-8"
             >
-              {/* TOP: Header με Λογότυπο και κουμπί Κλεισίματος */}
               <div className="flex justify-between items-center mb-8 border-b border-zinc-100 pb-5">
                 <div className="flex flex-col">
                   <span className="text-xl font-black tracking-tighter text-zinc-950">
@@ -275,7 +279,6 @@ export default function ClientHome({
                 </button>
               </div>
 
-              {/* CENTER: Τα Hooks Πλοήγησης (Σωστή Σειρά) */}
               <nav className="flex flex-col gap-6 text-lg font-medium text-zinc-700 flex-1">
                 <a
                   href="#about"
@@ -328,7 +331,6 @@ export default function ClientHome({
                 </a>
               </nav>
 
-              {/* BOTTOM: Επιλογή Γλώσσας */}
               <div className="border-t border-zinc-100 pt-6 mt-auto flex justify-between items-center">
                 <span className="text-xs font-medium text-zinc-500 uppercase tracking-widest">
                   Language
@@ -364,7 +366,7 @@ export default function ClientHome({
 
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-14 w-32 md:h-16 md:w-40 z-10">
             <Image
-              src="/logo/johnny_logo_no_bg.png"
+              src="./logo/johnny_logo_no_bg.png"
               alt="Johnny Hair Lab Logo"
               fill
               priority
@@ -611,8 +613,6 @@ export default function ClientHome({
                   key={index}
                   className="flex-none w-[75vw] sm:w-[40vw] md:w-[280px] snap-center bg-white rounded-2xl p-6 shadow-sm border border-zinc-100 flex flex-col items-center text-center"
                 >
-                  {/* Container Εικόνας - Χρειάζεται relative για το Image fill αν θέλαμε, 
-                      αλλά εδώ βάζουμε explicit width/height για να διατηρήσουμε το aspect ratio μέσα στο padding */}
                   <div className="relative w-full h-56 bg-zinc-50 rounded-xl mb-6 p-4 flex items-center justify-center overflow-hidden">
                     <Image
                       src={product.img}

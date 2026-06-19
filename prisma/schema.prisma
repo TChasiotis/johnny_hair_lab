@@ -8,27 +8,24 @@ datasource db {
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
-// 1. Πίνακας για τον Διαχειριστή (Admin)
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
-  password  String   // Εδώ θα αποθηκευτεί το bcrypt hash
+  password  String   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-// 2. Πίνακας για τις Υπηρεσίες του κουρείου
 model Service {
-  id         String   @id @default(cuid())
-  name       String
-  nameEn     String   @default("")
-  duration   String   // Ένα κοινό πεδίο για όλους (π.χ. "30 min")
-  price      String   // Ένα κοινό πεδίο για όλους (π.χ. "15 €")
-  sortOrder  Int      @default(0) // Νέο πεδίο για χειροκίνητη ταξινόμηση
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  name      String
+  nameEn    String   @default("")
+  duration  String   
+  price     String   
+  sortOrder Int      @default(0) 
+  createdAt DateTime @default(now())
 }
 
-// 3. Πίνακας για τα Προϊόντα (Lavish Care, κλπ)
 model Product {
   id        String   @id @default(cuid())
   name      String
@@ -45,5 +42,13 @@ model Product {
 
 model ApiLog {
   id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+}
+
+// 4. Νέος Πίνακας για τις Φωτογραφίες Our Work
+model GalleryImage {
+  id        String   @id @default(cuid())
+  url       String
+  sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 }
