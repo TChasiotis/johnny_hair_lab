@@ -13,6 +13,7 @@ import {
   X,
   ArrowUp,
   ArrowDown,
+  Settings,
 } from "lucide-react";
 import {
   createService,
@@ -23,6 +24,7 @@ import {
   updateProduct,
   deleteProduct,
   moveProduct,
+  updateAdminSettings, // <-- Προστέθηκε εδώ!
 } from "./actions";
 
 export default function AdminDashboard({
@@ -45,6 +47,17 @@ export default function AdminDashboard({
 
   const defaultService = { name: "", nameEn: "", duration: "", price: "" };
   const [serviceForm, setServiceForm] = useState(defaultService);
+
+  // --- STATES ΓΙΑ ΤΙΣ ΡΥΘΜΙΣΕΙΣ ---
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsUsername, setSettingsUsername] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsMessage, setSettingsMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const defaultProduct = {
     name: "",
@@ -127,7 +140,7 @@ export default function AdminDashboard({
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true); // Ξεκινάει το loading
+    setIsSubmitting(true);
     try {
       if (editingId) {
         await updateProduct(editingId, productForm);
@@ -138,7 +151,7 @@ export default function AdminDashboard({
         formData.append("category", productForm.category);
         formData.append("desc", productForm.desc);
         formData.append("descEn", productForm.descEn);
-        formData.append("useRemoveBg", useRemoveBg ? "true" : "false"); // Στέλνουμε το toggle
+        formData.append("useRemoveBg", useRemoveBg ? "true" : "false");
         if (productFile) {
           formData.append("file", productFile);
         }
@@ -147,7 +160,40 @@ export default function AdminDashboard({
       setProductModalOpen(false);
       router.refresh();
     } finally {
-      setIsSubmitting(false); // Σταματάει το loading
+      setIsSubmitting(false);
+    }
+  };
+
+  // --- SETTINGS HANDLER ---
+  const handleUpdateSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+    setSettingsMessage(null);
+
+    const formData = new FormData();
+    formData.append("username", settingsUsername);
+    formData.append("oldPassword", oldPassword);
+    formData.append("newPassword", newPassword);
+
+    const result = await updateAdminSettings(formData);
+
+    setSettingsLoading(false);
+
+    if (result.success) {
+      if (result.passwordChanged) {
+        alert("Ο κωδικός άλλαξε επιτυχώς. Παρακαλώ συνδεθείτε ξανά.");
+        await signOut({ callbackUrl: "/login" });
+      } else {
+        setSettingsMessage({
+          type: "success",
+          text: result.message || "Επιτυχία!",
+        });
+        setOldPassword("");
+        setNewPassword("");
+        setTimeout(() => setIsSettingsOpen(false), 2000);
+      }
+    } else {
+      setSettingsMessage({ type: "error", text: result.error || "Σφάλμα!" });
     }
   };
 
@@ -185,12 +231,23 @@ export default function AdminDashboard({
             </button>
           </nav>
         </div>
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-colors"
-        >
-          <LogOut size={18} /> Αποσύνδεση
-        </button>
+
+        <div>
+          {/* ΚΟΥΜΠΙ ΡΥΘΜΙΣΕΩΝ */}
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="flex items-center gap-3 px-4 py-3 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors w-full mb-2"
+          >
+            <Settings size={20} />
+            <span className="font-medium">Ρυθμίσεις</span>
+          </button>
+          <button
+            onClick={() => signOut({ callbackUrl: "/login" })}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-950/30 hover:text-red-300 transition-colors"
+          >
+            <LogOut size={18} /> Αποσύνδεση
+          </button>
+        </div>
       </aside>
 
       {/* MAIN CONTENT */}
@@ -204,19 +261,22 @@ export default function AdminDashboard({
                   : "Διαχείριση Προϊόντων"}
               </h2>
 
-              {/* --- ΤΟ ΝΟΥΜΕΡΟ 2 (ΜΕΤΡΗΤΗΣ) ΜΠΑΙΝΕΙ ΕΔΩ --- */}
+              {/* ΜΕΤΡΗΤΗΣ */}
               {activeTab === "products" && (
                 <p className="text-xs font-medium text-zinc-500 mt-1">
                   Χρήση Remove.bg αυτόν τον μήνα:{" "}
                   <span
-                    className={`font-bold ${monthlyUploadsCount >= 50 ? "text-red-500" : "text-zinc-900"}`}
+                    className={`font-bold ${
+                      monthlyUploadsCount >= 50
+                        ? "text-red-500"
+                        : "text-zinc-900"
+                    }`}
                   >
                     {monthlyUploadsCount} / 50
                   </span>{" "}
                   δωρεάν αφαιρέσεις φόντου.
                 </p>
               )}
-              {/* ------------------------------------------- */}
             </div>
             <button
               onClick={
@@ -727,6 +787,98 @@ export default function AdminDashboard({
                   className="px-5 py-2.5 text-white bg-zinc-950 hover:bg-zinc-800 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
                   {isSubmitting ? "Γίνεται αποθήκευση..." : "Αποθήκευση"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ΡΥΘΜΙΣΕΩΝ */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center p-6 border-b border-zinc-100">
+              <div>
+                <h3 className="text-xl font-bold text-zinc-900">
+                  Ρυθμίσεις Λογαριασμού
+                </h3>
+                <p className="text-xs text-zinc-500 mt-1">
+                  Αλλαγή username ή κωδικού πρόσβασης.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="text-zinc-400 hover:text-zinc-900 transition-colors p-1"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateSettings} className="p-6 space-y-5">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
+                  Νέο Όνομα Χρήστη
+                </label>
+                <input
+                  type="text"
+                  placeholder="π.χ. admin"
+                  value={settingsUsername}
+                  onChange={(e) => setSettingsUsername(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
+                  Παλαιός Κωδικός
+                </label>
+                <input
+                  type="password"
+                  placeholder="••••••••"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-600 mb-1.5">
+                  Νέος Κωδικός{" "}
+                  <span className="text-zinc-400 normal-case font-normal">
+                    (Προαιρετικό)
+                  </span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="Αφήστε κενό αν δεν αλλάξει"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:bg-white transition-all"
+                />
+              </div>
+
+              {settingsMessage && (
+                <div
+                  className={`p-3 rounded-lg text-sm font-medium ${
+                    settingsMessage.type === "success"
+                      ? "bg-green-50 text-green-700"
+                      : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  {settingsMessage.text}
+                </div>
+              )}
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={settingsLoading}
+                  className="w-full bg-zinc-950 hover:bg-zinc-800 text-white font-medium text-sm px-5 py-3 rounded-xl transition-colors disabled:opacity-50 flex justify-center items-center"
+                >
+                  {settingsLoading ? "Ενημέρωση..." : "Αποθήκευση Αλλαγών"}
                 </button>
               </div>
             </form>

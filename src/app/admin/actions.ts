@@ -249,3 +249,77 @@ export async function moveProduct(id: string, direction: "up" | "down") {
   revalidatePath("/admin");
   revalidatePath("/");
 }
+
+// Πρόσθεσε αυτό το import στην κορυφή του actions.ts αν δεν υπάρχει:
+import bcrypt from "bcryptjs";
+
+export async function updateAdminSettings(formData: FormData) {
+  try {
+    const newUsername = formData.get("username") as string;
+    const oldPassword = formData.get("oldPassword") as string;
+    const newPassword = formData.get("newPassword") as string;
+
+    if (!newUsername || !oldPassword) {
+      return {
+        success: false,
+        error: "Το όνομα χρήστη και ο παλαιός κωδικός είναι υποχρεωτικά πεδία.",
+      };
+    }
+
+    // Επειδή έχουμε μόνο έναν Admin στο σύστημα, παίρνουμε τον πρώτο χρήστη που βρίσκουμε
+    // (Αν το μοντέλο σου στο schema.prisma λέγεται 'admin' αντί για 'user', άλλαξέ το σε prisma.admin)
+    const adminUser = await prisma.user.findFirst();
+
+    if (!adminUser) {
+      return {
+        success: false,
+        error: "Δεν βρέθηκε ο λογαριασμός διαχειριστή στη βάση.",
+      };
+    }
+
+    // Έλεγχος: Ταιριάζει ο παλιός κωδικός με αυτόν της βάσης;
+    const isPasswordValid = await bcrypt.compare(
+      oldPassword,
+      adminUser.password,
+    );
+    if (!isPasswordValid) {
+      return {
+        success: false,
+        error: "Ο παλαιός κωδικός που πληκτρολογήσατε είναι λάθος.",
+      };
+    }
+
+    // Φτιάχνουμε το αντικείμενο με τα δεδομένα που θα γίνουν update
+    const updateData: any = {
+      username: newUsername,
+    };
+
+    let passwordChanged = false;
+
+    // Αν ο χρήστης συμπλήρωσε ΚΑΙ νέο κωδικό, τον κρυπτογραφούμε πριν τον σώσουμε
+    if (newPassword && newPassword.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+      updateData.password = hashedNewPassword;
+      passwordChanged = true;
+    }
+
+    // Ενημέρωση στη βάση (Neon)
+    await prisma.user.update({
+      where: { id: adminUser.id },
+      data: updateData,
+    });
+
+    // Καθαρισμός cache για να ανανεωθούν τα πάντα αμέσως
+    revalidatePath("/admin");
+
+    return {
+      success: true,
+      message: "Οι αλλαγές αποθηκεύτηκαν επιτυχώς!",
+      passwordChanged,
+    };
+  } catch (error: any) {
+    console.error("Σφάλμα κατά την αλλαγή στοιχείων admin:", error);
+    return { success: false, error: "Κάτι πήγε στραβά. Δοκιμάστε ξανά." };
+  }
+}
