@@ -239,14 +239,16 @@ export default function AdminDashboard({
   return (
     <div className="min-h-screen bg-zinc-100 flex flex-col md:flex-row text-zinc-900 font-sans">
       {/* MOBILE HEADER */}
-      <div className="md:hidden bg-zinc-950 text-white p-4 flex justify-between items-center sticky top-0 z-30 shadow-md">
-        <h1 className="text-lg font-bold tracking-tight">Johnny Hair Lab</h1>
+      <div className="md:hidden bg-zinc-950 text-white p-4 flex items-center gap-3 sticky top-0 z-30 shadow-md">
         <button
           onClick={() => setIsMobileMenuOpen(true)}
-          className="p-2 -mr-2 hover:bg-zinc-800 rounded-lg transition-colors"
+          className="p-2 -ml-2 hover:bg-zinc-800 rounded-lg transition-colors flex-shrink-0"
         >
           <Menu size={24} />
         </button>
+        <h1 className="text-lg font-bold tracking-tight truncate">
+          Johnny Hair Lab
+        </h1>
       </div>
 
       {/* OVERLAY ΓΙΑ ΤΟ MOBILE MENU */}
@@ -260,7 +262,7 @@ export default function AdminDashboard({
       {/* SIDEBAR */}
       <aside
         className={`
-        fixed top-0 left-0 z-50 h-screen w-64 bg-zinc-950 text-white flex flex-col justify-between p-6 
+        fixed top-0 left-0 z-50 h-[100dvh] w-64 bg-zinc-950 text-white flex flex-col justify-between p-6 overflow-y-auto
         transition-transform duration-300 ease-in-out md:translate-x-0
         ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
       `}
@@ -285,7 +287,7 @@ export default function AdminDashboard({
             <button
               onClick={() => {
                 setActiveTab("services");
-                setIsMobileMenuOpen(false); // Κλείνει το μενού στο κινητό μετά το κλικ
+                setIsMobileMenuOpen(false);
               }}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === "services"
@@ -311,7 +313,7 @@ export default function AdminDashboard({
           </nav>
         </div>
 
-        <div>
+        <div className="mt-8">
           {/* ΚΟΥΜΠΙ ΡΥΘΜΙΣΕΩΝ */}
           <button
             onClick={() => {
