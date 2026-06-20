@@ -1,5 +1,5 @@
 import ClientHome from "./ClientHome";
-import prisma from "./lib/prisma"; // ή όποια είναι η σωστή διαδρομή σου
+import prisma from "./lib/prisma";
 
 // Κάνουμε τη σελίδα να ανανεώνεται δυναμικά
 export const revalidate = 0;
@@ -15,5 +15,13 @@ export default async function Home() {
     orderBy: { sortOrder: "asc" },
   });
 
-  return <ClientHome services={services} products={products} />;
+  // ---> ΝΕΟ: Τραβάμε τις φωτογραφίες της Γκαλερί ΤΑΞΙΝΟΜΗΜΕΝΕΣ <---
+  const gallery = await prisma.galleryImage.findMany({
+    orderBy: { sortOrder: "asc" },
+  });
+
+  // ---> ΝΕΟ: Περνάμε και το gallery στο ClientHome <---
+  return (
+    <ClientHome services={services} products={products} gallery={gallery} />
+  );
 }
